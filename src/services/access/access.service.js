@@ -3,7 +3,7 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { createTokenPair, verifyJWT } = require('../../auth/authUtils');
-const { getInfoData } = require('../../utils');
+const { getInfoData, generateUserCode } = require('../../utils');
 const {
     BadRequestError,
     AuthFailureError,

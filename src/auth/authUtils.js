@@ -82,7 +82,7 @@ const verifyJWT = async (token, keySecret) => {
 
 const authenticationV2 = asyncHandler(async (req, res, next) => {
     /*
-        1 - check userId missing
+        1 - check userCode missing
         2 - get access token
         3 - verify token
         4 - check user in database
