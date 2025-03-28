@@ -9,7 +9,6 @@ const compression = require('compression');
 const app = express();
 
 const corsOptions = { origin: `http://localhost:8080/` };
-app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 
@@ -24,8 +23,7 @@ app.use(compression());
 // init middlewares
 
 // init db
-require('./dbs/init.mongodb');
-require('./dbs/init.mysql');
+require('./models/index');
 // const { countConnect } = require("./helpers/check.connect");
 // countConnect();
 

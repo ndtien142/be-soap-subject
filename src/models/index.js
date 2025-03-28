@@ -19,10 +19,38 @@ sequelize
         console.error('Unable to connect to the database: ', error);
     });
 
-const db = {};
+// Initialize the db object
+const database = {};
 
 // Import models
+const Account = require('./user/account')(sequelize);
+const Role = require('./user/role')(sequelize);
+const KeyToken = require('./user/keyToken')(sequelize);
 
-db.Sequelize = Sequelize;
+database.Account = Account;
+database.Role = Role;
+database.KeyToken = KeyToken;
 
-module.exports = db;
+// Add model to db object
+
+// Define associations
+database.Account.belongsTo(database.Role, {
+    foreignKey: 'fk_role_id',
+    as: 'role',
+});
+database.KeyToken.belongsTo(database.Account, { foreignKey: 'fk_user_code' });
+
+// Sync the models with the database
+sequelize
+    .sync({ alter: true })
+    .then(() => {
+        console.log('Database & tables created!');
+    })
+    .catch((error) => {
+        console.error('Error creating database & tables: ', error);
+    });
+
+database.Sequelize = Sequelize;
+database.sequelize = sequelize;
+
+module.exports = database;
