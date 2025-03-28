@@ -63,6 +63,10 @@ const blockAccount = async (userCode) => {
     );
 };
 
+const getAccountByUsername = async (username) => {
+    return db.Account.findOne({ where: { username } });
+};
+
 module.exports = {
     createAccount,
     getAccountByUserCode,
@@ -70,4 +74,5 @@ module.exports = {
     updateAccount,
     deleteAccount,
     blockAccount,
+    getAccountByUsername,
 };

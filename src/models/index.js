@@ -23,9 +23,9 @@ sequelize
 const database = {};
 
 // Import models
-const Account = require('./user/account.model')(sequelize);
-const Role = require('./user/role.model')(sequelize);
-const KeyToken = require('./user/keyToken.model')(sequelize);
+const Account = require('./user/account')(sequelize);
+const Role = require('./user/role')(sequelize);
+const KeyToken = require('./user/keyToken')(sequelize);
 
 database.Account = Account;
 database.Role = Role;
