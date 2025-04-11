@@ -103,7 +103,7 @@ database.DetailEquipment.belongsTo(ImportReceipt, {
 
 // Sync the models with the database
 sequelize
-    .sync({ force: true })
+    .sync({ sync: true })
     .then(() => {
         console.log('Database & tables created!');
     })
