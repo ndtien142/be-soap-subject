@@ -19,13 +19,15 @@ class EquipmentController {
     getAllEquipment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all equipment successfully',
-            metadata: await EquipmentService.getAllEquipment(),
+            metadata: await EquipmentService.getAllEquipment(req.query),
         }).send(res);
     };
     getEquipmentByCode = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get equipment by code successfully',
-            metadata: await EquipmentService.getEquipmentByCode(req.params),
+            metadata: await EquipmentService.getEquipmentByCode(
+                req.params.equipmentCode,
+            ),
         }).send(res);
     };
     updateEquipment = async (req, res, next) => {
@@ -37,13 +39,17 @@ class EquipmentController {
     deleteEquipment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Delete equipment successfully',
-            metadata: await EquipmentService.deleteEquipment(req.params),
+            metadata: await EquipmentService.deleteEquipment(
+                req.params.equipmentCode,
+            ),
         }).send(res);
     };
     deactivateEquipment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Deactive equipment successfully',
-            metadata: await EquipmentService.deactivateEquipment(req.params),
+            metadata: await EquipmentService.deactivateEquipment(
+                req.params.equipmentCode,
+            ),
         }).send(res);
     };
 }

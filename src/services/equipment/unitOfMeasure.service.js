@@ -16,14 +16,23 @@ class UnitOfMeasureService {
             unit_of_measure_name: name,
             unit_of_measure_description: description,
             is_active: true,
+            is_deleted: false,
         });
         return {
             code: 200,
             message: 'Unit of measure created successfully',
-            metadata: newUnitOfMeasure,
+            metadata: {
+                id: newUnitOfMeasure.id,
+                name: newUnitOfMeasure.unit_of_measure_name,
+                description: newUnitOfMeasure.unit_of_measure_description,
+                isActive: newUnitOfMeasure.is_active,
+                isDeleted: newUnitOfMeasure.is_deleted,
+                createdAt: newUnitOfMeasure.createdAt,
+                updatedAt: newUnitOfMeasure.updatedAt,
+            },
         };
     };
-    static getAllUnitOfMeasure = async ({ page = 1, limit = 0 }) => {
+    static getAllUnitOfMeasure = async ({ page = 1, limit = 20 }) => {
         const offset = (page - 1) * limit;
         const unitOfMeasure = await database.UnitOfMeasure.findAndCountAll({
             where: { is_deleted: false },
@@ -36,7 +45,23 @@ class UnitOfMeasureService {
         return {
             code: 200,
             message: 'Get all unit of measure successfully',
-            metadata: unitOfMeasure,
+            metadata: unitOfMeasure.rows.map((unit) => {
+                return {
+                    id: unit.id,
+                    name: unit.unit_of_measure_name,
+                    description: unit.unit_of_measure_description,
+                    isActive: unit.is_active,
+                    isDeleted: unit.is_deleted,
+                    createdAt: unit.createdAt,
+                    updatedAt: unit.updatedAt,
+                };
+            }),
+            meta: {
+                currentPage: page,
+                itemPerPage: limit,
+                totalItems: unitOfMeasure.count,
+                totalPages: Math.ceil(unitOfMeasure.count / limit),
+            },
         };
     };
     static getUnitOfMeasureById = async (id) => {
@@ -49,7 +74,15 @@ class UnitOfMeasureService {
         return {
             code: 200,
             message: 'Get unit of measure by ID successfully',
-            metadata: unitOfMeasure,
+            metadata: {
+                id: unitOfMeasure.id,
+                name: unitOfMeasure.unit_of_measure_name,
+                description: unitOfMeasure.unit_of_measure_description,
+                isActive: unitOfMeasure.is_active,
+                isDeleted: unitOfMeasure.is_deleted,
+                createdAt: unitOfMeasure.createdAt,
+                updatedAt: unitOfMeasure.updatedAt,
+            },
         };
     };
     static updateUnitOfMeasure = async ({ id, name, description }) => {
@@ -65,7 +98,15 @@ class UnitOfMeasureService {
         return {
             code: 200,
             message: 'Unit of measure updated successfully',
-            metadata: unitOfMeasure,
+            metadata: {
+                id: unitOfMeasure.id,
+                name: unitOfMeasure.unit_of_measure_name,
+                description: unitOfMeasure.unit_of_measure_description,
+                isActive: unitOfMeasure.is_active,
+                isDeleted: unitOfMeasure.is_deleted,
+                createdAt: unitOfMeasure.createdAt,
+                updatedAt: unitOfMeasure.updatedAt,
+            },
         };
     };
     static deleteUnitOfMeasure = async (id) => {
@@ -81,7 +122,15 @@ class UnitOfMeasureService {
         return {
             code: 200,
             message: 'Unit of measure deleted successfully',
-            metadata: unitOfMeasure,
+            metadata: {
+                id: unitOfMeasure.id,
+                name: unitOfMeasure.unit_of_measure_name,
+                description: unitOfMeasure.unit_of_measure_description,
+                isActive: unitOfMeasure.is_active,
+                isDeleted: unitOfMeasure.is_deleted,
+                createdAt: unitOfMeasure.createdAt,
+                updatedAt: unitOfMeasure.updatedAt,
+            },
         };
     };
 }

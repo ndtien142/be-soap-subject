@@ -15,7 +15,7 @@ class EquipmentTypeController {
     getAllEquipmentType = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all equipment type successfully',
-            metadata: await EquipmentTypeService.getAllEquipmentType(),
+            metadata: await EquipmentTypeService.getAllEquipmentType(req.query),
         }).send(res);
     };
 
