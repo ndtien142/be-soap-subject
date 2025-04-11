@@ -38,6 +38,23 @@ const DetailImportReceipt = require('./import-receipt/detailImportReceipt')(
     sequelize,
 );
 const Supplier = require('./import-receipt/supplier')(sequelize);
+// Import models liquidation receipt
+const LiquidationReceipt = require('./liquidation-receipt/liquidationReceipt')(
+    sequelize,
+);
+const LiquidationReceiptDetail =
+    require('./liquidation-receipt/liquidationReceiptDetail')(sequelize);
+
+// Import models department
+const Department = require('./department/department')(sequelize);
+const Room = require('./department/room')(sequelize);
+
+// Import models transfer receipt
+const TransferReceipt = require('./transfer-receipt/transferReceipt')(
+    sequelize,
+);
+const TransferReceiptDetail =
+    require('./transfer-receipt/transferReceiptDetail')(sequelize);
 
 database.Account = Account;
 database.Role = Role;
@@ -52,6 +69,15 @@ database.DetailEquipment = DetailEquipment;
 database.ImportReceipt = ImportReceipt;
 database.DetailImportReceipt = DetailImportReceipt;
 database.Supplier = Supplier;
+// Liquidation receipt
+database.LiquidationReceipt = LiquidationReceipt;
+database.LiquidationReceiptDetail = LiquidationReceiptDetail;
+// Department
+database.Department = Department;
+database.Room = Room;
+// Transfer receipt
+database.TransferReceipt = TransferReceipt;
+database.TransferReceiptDetail = TransferReceiptDetail;
 
 // Add model to db object
 
@@ -93,6 +119,34 @@ database.ImportReceipt.belongsToMany(Equipment, {
 
 database.DetailEquipment.belongsTo(ImportReceipt, {
     foreignKey: 'fk_import_receipt_id',
+});
+
+// Liquidation receipt associations
+database.LiquidationReceipt.belongsTo(database.Account, {
+    foreignKey: 'fk_user_code',
+});
+
+database.LiquidationReceipt.belongsToMany(Equipment, {
+    through: LiquidationReceiptDetail,
+});
+
+// Transfer receipt associations
+database.TransferReceipt.belongsTo(database.Account, {
+    foreignKey: 'fk_user_code',
+});
+database.TransferReceipt.belongsTo(database.Room, {
+    foreignKey: 'fk_transfer_from',
+});
+database.TransferReceipt.belongsTo(database.Room, {
+    foreignKey: 'fk_transfer_to',
+});
+database.TransferReceipt.belongsToMany(Equipment, {
+    through: TransferReceiptDetail,
+});
+
+// Department associations
+database.Room.belongsTo(database.Department, {
+    foreignKey: 'fk_department_id',
 });
 
 // Sync the models with the database
