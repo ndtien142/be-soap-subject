@@ -2,13 +2,38 @@ require('dotenv').config();
 
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const bodyParser = require('body-parser');
-const { default: helmet } = require('helmet');
+// const { default: helmet } = require('helmet');
+const helmet = require('helmet');
 const compression = require('compression');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./configs/swagger.config');
 
 const app = express();
 
-const corsOptions = { origin: `http://localhost:8080/` };
+app.use(
+    cors({
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+            'Origin',
+            'X-Requested-With',
+            'Accept',
+            'Access-Control-Allow-Headers',
+            'Access-Control-Allow-Origin',
+            'Access-Control-Allow-Methods',
+            'Access-Control-Request-Headers',
+            'Access-Control-Request-Method',
+            'X-Client-Id',
+            'X-Api-Key',
+        ],
+    }),
+);
 
 app.use(bodyParser.json());
 
@@ -17,7 +42,12 @@ app.use(morgan('dev'));
 // morgan("tiny");
 // morgan("short");
 // morgan("common");
-app.use(helmet());
+app.use(
+    helmet({
+        crossOriginOpenerPolicy: false, // ❌ disable header gây lỗi
+        originAgentCluster: false, // ❌ disable nếu cần
+    }),
+);
 app.use(compression());
 
 // init middlewares
@@ -27,8 +57,11 @@ require('./models/index');
 // const { countConnect } = require("./helpers/check.connect");
 // countConnect();
 
+// init swagger
+app.use('/v1/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // init routes
 app.use('/', require('./routes'));
+
 // handling error
 
 module.exports = app;
