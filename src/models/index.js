@@ -26,10 +26,32 @@ const database = {};
 const Account = require('./user/account')(sequelize);
 const Role = require('./user/role')(sequelize);
 const KeyToken = require('./user/keyToken')(sequelize);
+//  Import Equipment models
+const Equipment = require('./equipment/equipment')(sequelize);
+const EquipmentType = require('./equipment/equipmentType')(sequelize);
+const UnitOfMeasure = require('./equipment/unitOfMeasure')(sequelize);
+const DetailEquipment = require('./equipment/detailEquipment')(sequelize);
+
+// Import models import receipt
+const ImportReceipt = require('./import-receipt/importReceipt')(sequelize);
+const DetailImportReceipt = require('./import-receipt/detailImportReceipt')(
+    sequelize,
+);
+const Supplier = require('./supplier/supplier')(sequelize);
 
 database.Account = Account;
 database.Role = Role;
 database.KeyToken = KeyToken;
+
+// Equipment
+database.Equipment = Equipment;
+database.EquipmentType = EquipmentType;
+database.UnitOfMeasure = UnitOfMeasure;
+database.DetailEquipment = DetailEquipment;
+// Import receipt
+database.ImportReceipt = ImportReceipt;
+database.DetailImportReceipt = DetailImportReceipt;
+database.Supplier = Supplier;
 
 // Add model to db object
 
@@ -39,6 +61,47 @@ database.Account.belongsTo(database.Role, {
     as: 'role',
 });
 database.KeyToken.belongsTo(database.Account, { foreignKey: 'fk_user_code' });
+
+database.Equipment.belongsTo(database.EquipmentType, {
+    foreignKey: 'fk_equipment_type_id',
+    as: 'equipmentType',
+});
+database.Equipment.belongsTo(database.UnitOfMeasure, {
+    foreignKey: 'fk_unit_of_measure_id',
+    as: 'unitOfMeasure',
+});
+database.DetailEquipment.belongsTo(database.Equipment, {
+    foreignKey: 'fk_equipment_code',
+    as: 'equipment',
+});
+database.DetailEquipment.belongsTo(database.EquipmentType, {
+    foreignKey: 'fk_equipment_type_id',
+    as: 'equipmentType',
+});
+database.DetailEquipment.belongsTo(database.EquipmentStatus, {
+    foreignKey: 'fk_equipment_status_id',
+    as: 'equipmentStatus',
+});
+database.DetailEquipment.belongsTo(database.UnitOfMeasure, {
+    foreignKey: 'fk_unit_of_measure_id',
+    as: 'unitOfMeasure',
+});
+database.DetailImportReceipt.belongsTo(database.Equipment, {
+    foreignKey: 'fk_equipment_code',
+    as: 'equipment',
+});
+database.DetailImportReceipt.belongsTo(database.ImportReceipt, {
+    foreignKey: 'fk_import_receipt_id',
+    as: 'importReceipt',
+});
+database.DetailImportReceipt.belongsTo(database.Supplier, {
+    foreignKey: 'fk_supplier_id',
+    as: 'supplier',
+});
+database.ImportReceipt.belongsTo(database.Supplier, {
+    foreignKey: 'fk_supplier_id',
+    as: 'supplier',
+});
 
 // Sync the models with the database
 sequelize
