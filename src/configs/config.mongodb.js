@@ -6,10 +6,10 @@ const dev = {
     },
     db: {
         host: process.env.DEV_DB_HOST || 'localhost',
-        port: process.env.DEV_DB_PORT || 27017,
+        port: process.env.DEV_DB_PORT || 3306,
         name: process.env.DEV_DB_NAME || 'universityDev',
         user: process.env.DEV_USER_NAME || 'root',
-        password: process.env.DEV_PASSWORD || 'tien1234',
+        password: process.env.DEV_PASSWORD || '123456',
         dialect: process.env.DEV_DIALECT || 'mysql',
     },
 };
