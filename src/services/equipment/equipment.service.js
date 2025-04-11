@@ -177,10 +177,10 @@ class EquipmentService {
         };
     };
     static getAllEquipment = async ({ page = 1, limit = 20 }) => {
-        const offset = (page - 1) * limit;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
         const equipmentList = await database.Equipment.findAndCountAll({
             where: { is_deleted: false },
-            limit,
+            limit: parseInt(limit),
             offset,
             include: [
                 {
@@ -221,8 +221,8 @@ class EquipmentService {
                 };
             }),
             meta: {
-                currentPage: page,
-                itemPerPage: limit,
+                currentPage: parseInt(page),
+                itemPerPage: parseInt(limit),
                 totalItems: equipmentList.count,
                 totalPages: Math.ceil(equipmentList.count / limit),
             },

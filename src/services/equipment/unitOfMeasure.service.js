@@ -36,7 +36,7 @@ class UnitOfMeasureService {
         const offset = (page - 1) * limit;
         const unitOfMeasure = await database.UnitOfMeasure.findAndCountAll({
             where: { is_deleted: false },
-            limit: limit,
+            limit: parseInt(limit),
             offset: offset,
         });
         if (!unitOfMeasure) {
@@ -57,8 +57,8 @@ class UnitOfMeasureService {
                 };
             }),
             meta: {
-                currentPage: page,
-                itemPerPage: limit,
+                currentPage: parseInt(page),
+                itemPerPage: parseInt(limit),
                 totalItems: unitOfMeasure.count,
                 totalPages: Math.ceil(unitOfMeasure.count / limit),
             },

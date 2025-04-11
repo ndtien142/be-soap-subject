@@ -1,6 +1,5 @@
 const EquipmentTypeService = require('../services/equipment/equipmentType.service');
 const { CREATED, SuccessResponse } = require('../core/success.response');
-const { BadRequestError } = require('../core/error.response');
 
 class EquipmentTypeController {
     createNewEquipmentType = async (req, res, next) => {

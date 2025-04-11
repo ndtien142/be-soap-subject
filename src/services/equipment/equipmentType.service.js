@@ -35,10 +35,10 @@ class EquipmentTypeService {
         };
     };
     static getAllEquipmentType = async ({ page = 1, limit = 20 }) => {
-        const offset = (page - 1) * limit;
+        const offset = (parseInt(page) - 1) * limit;
         const equipmentType = await EquipmentType.findAndCountAll({
             where: { is_deleted: false },
-            limit: limit,
+            limit: parseInt(limit),
             offset: offset,
         });
         if (!equipmentType) {
@@ -60,8 +60,8 @@ class EquipmentTypeService {
                 };
             }),
             meta: {
-                currentPage: page,
-                itemPerPage: limit,
+                currentPage: parseInt(page),
+                itemPerPage: parseInt(limit),
                 totalItems: equipmentType.count,
                 totalPages: Math.ceil(equipmentType.count / limit),
             },
