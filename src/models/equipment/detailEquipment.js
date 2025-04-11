@@ -15,14 +15,6 @@ function model(sequelize) {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
-        fk_equipment_type_id: {
-            type: DataTypes.TINYINT,
-            allowNull: false,
-        },
-        fk_equipment_status_id: {
-            type: DataTypes.TINYINT,
-            allowNull: false,
-        },
         day_of_first_use: {
             type: DataTypes.DATE,
             allowNull: true,
@@ -34,6 +26,17 @@ function model(sequelize) {
         equipment_location: {
             type: DataTypes.STRING(255),
             allowNull: true,
+        },
+        status: {
+            type: DataTypes.ENUM(
+                'available',
+                'in_use',
+                'under_maintenance',
+                'out_of_service',
+                'liquidation',
+            ),
+            allowNull: false,
+            defaultValue: 'available',
         },
         fk_import_receipt_id: {
             type: DataTypes.INTEGER,

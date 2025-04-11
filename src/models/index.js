@@ -27,7 +27,6 @@ const Account = require('./user/account')(sequelize);
 const Role = require('./user/role')(sequelize);
 const KeyToken = require('./user/keyToken')(sequelize);
 //  Import Equipment models
-const EquipmentStatus = require('./equipment/equipmentStatus')(sequelize);
 const Equipment = require('./equipment/equipment')(sequelize);
 const EquipmentType = require('./equipment/equipmentType')(sequelize);
 const UnitOfMeasure = require('./equipment/unitOfMeasure')(sequelize);
@@ -45,7 +44,6 @@ database.Role = Role;
 database.KeyToken = KeyToken;
 
 // Equipment
-database.EquipmentStatus = EquipmentStatus;
 database.Equipment = Equipment;
 database.EquipmentType = EquipmentType;
 database.UnitOfMeasure = UnitOfMeasure;
@@ -75,10 +73,6 @@ database.Equipment.belongsTo(database.UnitOfMeasure, {
 
 database.DetailEquipment.belongsTo(database.Equipment, {
     foreignKey: 'fk_equipment_code',
-});
-
-database.DetailEquipment.belongsTo(database.EquipmentStatus, {
-    foreignKey: 'fk_equipment_status_id',
 });
 
 // Import receipt associations

@@ -36,6 +36,16 @@ function model(sequelize) {
             type: DataTypes.STRING(1000),
             allowNull: true,
         },
+        status: {
+            type: DataTypes.ENUM(
+                'pending',
+                'approved',
+                'completed',
+                'rejected',
+            ),
+            allowNull: false,
+            defaultValue: 'pending',
+        },
     };
 
     const options = {
