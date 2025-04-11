@@ -18,7 +18,6 @@ function model(sequelize) {
         fk_equipment_type_id: {
             type: DataTypes.TINYINT,
             allowNull: false,
-            references: { model: 'tb_equipment_type', key: 'id' },
         },
         equipment_manufacturer: {
             type: DataTypes.STRING(255),

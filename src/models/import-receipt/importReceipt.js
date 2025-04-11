@@ -27,12 +27,10 @@ function model(sequelize) {
         fk_supplier_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: { model: 'tb_supplier', key: 'id' },
         },
         fk_user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
-            references: { model: 'tb_user', key: 'user_code' },
         },
         note: {
             type: DataTypes.STRING(1000),

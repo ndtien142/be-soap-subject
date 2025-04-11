@@ -7,42 +7,34 @@ module.exports = model;
 function model(sequelize) {
     const attributes = {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.TINYINT,
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        supplier_name: {
+        equipment_status_name: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        supplier_description: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-        },
-        supplier_address: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-        },
-        supplier_phone: {
-            type: DataTypes.STRING(20),
-            allowNull: true,
-        },
-        supplier_email: {
+        equipment_status_description: {
             type: DataTypes.STRING(255),
             allowNull: true,
         },
     };
 
     const options = {
-        tableName: 'tb_supplier',
+        tableName: 'tb_equipment_status',
         freezeTableName: true,
         timestamps: true,
         createdAt: 'create_time',
         updatedAt: 'update_time',
     };
 
-    const Supplier = sequelize.define('Supplier', attributes, options);
+    const EquipmentStatus = sequelize.define(
+        'EquipmentStatus',
+        attributes,
+        options,
+    );
 
-    return Supplier;
+    return EquipmentStatus;
 }
