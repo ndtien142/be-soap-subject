@@ -117,7 +117,7 @@ const authenticationV2 = asyncHandler(async (req, res, next) => {
         }
     }
 
-    const accessToken = req.headers[HEADER.AUTHORIZATION];
+    let accessToken = req.headers[HEADER.AUTHORIZATION];
 
     if (accessToken.startsWith('Bearer ')) {
         accessToken = accessToken.slice(7, accessToken.length);

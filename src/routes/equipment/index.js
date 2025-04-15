@@ -62,6 +62,11 @@ const router = express.Router();
  * /equipment:
  *   post:
  *     summary: Create a new equipment
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Equipment]
  *     requestBody:
  *       required: true
@@ -92,6 +97,11 @@ const router = express.Router();
  * /equipment:
  *   put:
  *     summary: Update an existing equipment
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Equipment]
  *     requestBody:
  *       required: true
@@ -124,13 +134,17 @@ const router = express.Router();
  * /equipment/{equipmentCode}:
  *   get:
  *     summary: Get equipment by code
- *     tags: [Equipment]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: equipmentCode
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: Equipment retrieved successfully
@@ -145,8 +159,11 @@ const router = express.Router();
  * /equipment:
  *   get:
  *     summary: Get all equipment
- *     tags: [Equipment]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -155,6 +172,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: List of equipment retrieved successfully
@@ -185,13 +203,17 @@ const router = express.Router();
  * /equipment/{equipmentCode}:
  *   delete:
  *     summary: Delete an equipment (soft delete)
- *     tags: [Equipment]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: equipmentCode
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: Equipment deleted successfully
@@ -202,19 +224,23 @@ const router = express.Router();
  * /equipment/deactivate/{equipmentCode}:
  *   patch:
  *     summary: Deactivate an equipment
- *     tags: [Equipment]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: equipmentCode
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: Equipment deactivated successfully
  */
 
-// router.use(authenticationV2);
+router.use(authenticationV2);
 
 router.post('', asyncHandler(equipmentController.createNewEquipment));
 router.put('', asyncHandler(equipmentController.updateEquipment));

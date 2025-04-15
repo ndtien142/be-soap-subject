@@ -9,8 +9,28 @@ const options = {
             description: 'API documentation for School Management application',
         },
         components: {
+            parameters: {
+                UserCodeHeader: {
+                    name: 'x-user-code',
+                    in: 'header',
+                    description: 'User Code',
+                    required: true,
+                    schema: {
+                        type: 'string',
+                    },
+                },
+                RefreshTokenHeader: {
+                    name: 'x-rf-token',
+                    in: 'header',
+                    description: 'Refresh Token',
+                    required: false,
+                    schema: {
+                        type: 'string',
+                    },
+                },
+            },
             securitySchemes: {
-                bearerAuth: {
+                BearerAuth: {
                     type: 'http',
                     scheme: 'bearer',
                     bearerFormat: 'JWT',
@@ -19,7 +39,7 @@ const options = {
         },
         security: [
             {
-                bearerAuth: [],
+                BearerAuth: [],
             },
         ],
         servers: [
