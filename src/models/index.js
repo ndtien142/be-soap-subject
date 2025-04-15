@@ -26,6 +26,8 @@ const database = {};
 const Account = require('./user/account')(sequelize);
 const Role = require('./user/role')(sequelize);
 const KeyToken = require('./user/keyToken')(sequelize);
+const RefreshTokenUsed = require('./user/refreshTokenUsed')(sequelize);
+const Permission = require('./user/permission')(sequelize);
 //  Import Equipment models
 const Equipment = require('./equipment/equipment')(sequelize);
 const EquipmentType = require('./equipment/equipmentType')(sequelize);
@@ -59,6 +61,8 @@ const TransferReceiptDetail =
 database.Account = Account;
 database.Role = Role;
 database.KeyToken = KeyToken;
+database.RefreshTokenUsed = RefreshTokenUsed;
+database.Permission = Permission;
 
 // Equipment
 database.Equipment = Equipment;
@@ -87,6 +91,18 @@ database.Account.belongsTo(database.Role, {
     as: 'role',
 });
 database.KeyToken.belongsTo(database.Account, { foreignKey: 'fk_user_code' });
+database.RefreshTokenUsed.belongsTo(database.KeyToken, {
+    foreignKey: 'fk_user_code',
+    targetKey: 'fk_user_code',
+});
+database.Permission.belongsToMany(database.Role, {
+    through: 'tb_role_permission',
+    foreignKey: 'fk_permission_id',
+});
+database.Role.belongsToMany(database.Permission, {
+    through: 'tb_role_permission',
+    foreignKey: 'fk_role_id',
+});
 
 // Equipment associations
 database.Equipment.belongsTo(database.EquipmentType, {
