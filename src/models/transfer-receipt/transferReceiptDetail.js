@@ -6,11 +6,11 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        fk_transfer_receipt_id: {
+        transfer_receipt_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        fk_serial_number: {
+        serial_number: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },

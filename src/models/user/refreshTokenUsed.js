@@ -10,7 +10,7 @@ function model(sequelize) {
             type: DataTypes.TEXT,
             allowNull: false,
         },
-        fk_user_code: {
+        user_code: {
             type: DataTypes.STRING(50),
             allowNull: false,
         },
