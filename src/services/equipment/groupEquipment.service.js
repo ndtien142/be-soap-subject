@@ -1,0 +1,335 @@
+'use strict';
+
+const { BadRequestError } = require('../../core/error.response');
+const database = require('../../models');
+
+class GroupEquipmentService {
+    static createNewGroupEquipment = async ({
+        type,
+        name,
+        description,
+        unitOfMeasure,
+        manufacturer,
+    }) => {
+        const groupEquipmentCode =
+            GroupEquipmentService.generateGroupEquipmentCode(type);
+
+        const unitOfMeasureData = await database.UnitOfMeasure.findOne({
+            where: {
+                unit_of_measure_name: unitOfMeasure.name,
+                id: unitOfMeasure.id,
+            },
+        });
+        if (!unitOfMeasureData) {
+            throw new BadRequestError('Unit of measure not found');
+        }
+
+        const equipmentTypeData = await database.EquipmentType.findOne({
+            where: { equipment_type_name: type.name, id: type.id },
+        });
+        if (!equipmentTypeData) {
+            throw new BadRequestError('Equipment type not found');
+        }
+
+        const manufacturerData = await database.EquipmentManufacturer.findOne({
+            where: {
+                id: manufacturer.id,
+                manufacturer_name: manufacturer.name,
+            },
+        });
+        if (!manufacturerData) {
+            throw new BadRequestError('Manufacturer not found');
+        }
+
+        const existingGroupEquipmentName =
+            await database.GroupEquipment.findOne({
+                where: { group_equipment_name: name },
+            });
+        if (existingGroupEquipmentName) {
+            throw new BadRequestError('Group equipment name already exists');
+        }
+
+        const newGroupEquipment = await database.GroupEquipment.create({
+            group_equipment_code: groupEquipmentCode,
+            group_equipment_name: name,
+            group_equipment_description: description,
+            fk_unit_of_measure_id: unitOfMeasureData.id,
+            fk_equipment_type_id: equipmentTypeData.id,
+            fk_manufacturer_id: manufacturerData.id,
+            is_deleted: false,
+            is_active: true,
+        });
+        return {
+            code: 200,
+            message: 'Group equipment created successfully',
+            metadata: {
+                code: newGroupEquipment.group_equipment_code,
+                name: newGroupEquipment.group_equipment_name,
+                description: newGroupEquipment.group_equipment_description,
+                unitOfMeasure: {
+                    id: unitOfMeasureData.id,
+                    name: unitOfMeasureData.unit_of_measure_name,
+                },
+                type: {
+                    id: equipmentTypeData.id,
+                    name: equipmentTypeData.equipment_type_name,
+                },
+                manufacturer: {
+                    id: manufacturerData.id,
+                    name: manufacturerData.manufacturer_name,
+                },
+                isDeleted: newGroupEquipment.is_deleted,
+                isActive: newGroupEquipment.is_active,
+                createdAt: newGroupEquipment.createdAt,
+                updatedAt: newGroupEquipment.updatedAt,
+            },
+        };
+    };
+
+    static generateGroupEquipmentCode = (typeEquipment) => {
+        const prefix = typeEquipment.name.trim().slice(0, 3).toUpperCase();
+        const timestamp = Date.now();
+        return `${prefix}-${timestamp}`;
+    };
+
+    static updateGroupEquipment = async ({
+        code,
+        type,
+        name,
+        description,
+        unitOfMeasure,
+        manufacturer,
+    }) => {
+        const groupEquipment = await database.GroupEquipment.findOne({
+            where: { group_equipment_code: code },
+        });
+        if (!groupEquipment) {
+            throw new BadRequestError('Group equipment not found');
+        }
+
+        const unitOfMeasureData = await database.UnitOfMeasure.findOne({
+            where: {
+                unit_of_measure_name: unitOfMeasure.name,
+                id: unitOfMeasure.id,
+            },
+        });
+        if (!unitOfMeasureData) {
+            throw new BadRequestError('Unit of measure not found');
+        }
+
+        const equipmentTypeData = await database.EquipmentType.findOne({
+            where: { equipment_type_name: type.name, id: type.id },
+        });
+        if (!equipmentTypeData) {
+            throw new BadRequestError('Equipment type not found');
+        }
+
+        const manufacturerData = await database.EquipmentManufacturer.findOne({
+            where: {
+                id: manufacturer.id,
+                manufacturer_name: manufacturer.name,
+            },
+        });
+        if (!manufacturerData) {
+            throw new BadRequestError('Manufacturer not found');
+        }
+
+        const existingGroupEquipmentName =
+            await database.GroupEquipment.findOne({
+                where: { group_equipment_name: name },
+            });
+        if (
+            existingGroupEquipmentName &&
+            existingGroupEquipmentName.group_equipment_code !== code
+        ) {
+            throw new BadRequestError('Group equipment name already exists');
+        }
+
+        groupEquipment.group_equipment_name = name;
+        groupEquipment.group_equipment_description = description;
+        groupEquipment.fk_unit_of_measure_id = unitOfMeasureData.id;
+        groupEquipment.fk_equipment_type_id = equipmentTypeData.id;
+        groupEquipment.fk_manufacturer_id = manufacturerData.id;
+
+        await groupEquipment.save();
+
+        return {
+            code: 200,
+            message: 'Group equipment updated successfully',
+            metadata: {
+                code: groupEquipment.group_equipment_code,
+                name: groupEquipment.group_equipment_name,
+                description: groupEquipment.group_equipment_description,
+                unitOfMeasure: {
+                    id: unitOfMeasureData.id,
+                    name: unitOfMeasureData.unit_of_measure_name,
+                },
+                type: {
+                    id: equipmentTypeData.id,
+                    name: equipmentTypeData.equipment_type_name,
+                },
+                manufacturer: {
+                    id: manufacturerData.id,
+                    name: manufacturerData.manufacturer_name,
+                },
+                isDeleted: groupEquipment.is_deleted,
+                isActive: groupEquipment.is_active,
+                createdAt: groupEquipment.createdAt,
+                updatedAt: groupEquipment.updatedAt,
+            },
+        };
+    };
+
+    static deleteGroupEquipment = async (groupEquipmentCode) => {
+        const groupEquipment = await database.GroupEquipment.findOne({
+            where: { group_equipment_code: groupEquipmentCode },
+        });
+        if (!groupEquipment) {
+            throw new BadRequestError('Group equipment not found');
+        }
+
+        groupEquipment.is_deleted = true;
+        groupEquipment.is_active = false;
+        await groupEquipment.save();
+
+        return {
+            code: 200,
+            message: 'Group equipment deleted successfully',
+            metadata: groupEquipment,
+        };
+    };
+
+    static deactivateGroupEquipment = async (groupEquipmentCode) => {
+        const groupEquipment = await database.GroupEquipment.findOne({
+            where: { group_equipment_code: groupEquipmentCode },
+        });
+        if (!groupEquipment) {
+            throw new BadRequestError('Group equipment not found');
+        }
+
+        groupEquipment.is_active = false;
+        await groupEquipment.save();
+
+        return {
+            code: 200,
+            message: 'Group equipment deactivated successfully',
+            metadata: groupEquipment,
+        };
+    };
+
+    static getAllGroupEquipment = async ({ page = 1, limit = 20 }) => {
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const groupEquipmentList =
+            await database.GroupEquipment.findAndCountAll({
+                where: { is_deleted: false },
+                limit: parseInt(limit),
+                offset,
+                include: [
+                    {
+                        model: database.EquipmentType,
+                        as: 'EquipmentType',
+                        attributes: ['equipment_type_name', 'id'],
+                    },
+                    {
+                        model: database.UnitOfMeasure,
+                        as: 'UnitOfMeasure',
+                        attributes: ['unit_of_measure_name', 'id'],
+                    },
+                    {
+                        model: database.EquipmentManufacturer,
+                        as: 'EquipmentManufacturer',
+                        attributes: ['manufacturer_name', 'id'],
+                    },
+                ],
+            });
+        if (!groupEquipmentList) {
+            throw new BadRequestError('No group equipment found');
+        }
+        return {
+            code: 200,
+            message: 'Get all group equipment successfully',
+            metadata: groupEquipmentList.rows.map((groupEquipment) => ({
+                code: groupEquipment.group_equipment_code,
+                name: groupEquipment.group_equipment_name,
+                description: groupEquipment.group_equipment_description,
+                unitOfMeasure: {
+                    id: groupEquipment.UnitOfMeasure.id,
+                    name: groupEquipment.UnitOfMeasure.unit_of_measure_name,
+                },
+                type: {
+                    id: groupEquipment.EquipmentType.id,
+                    name: groupEquipment.EquipmentType.equipment_type_name,
+                },
+                manufacturer: {
+                    id: groupEquipment.EquipmentManufacturer.id,
+                    name: groupEquipment.EquipmentManufacturer
+                        .manufacturer_name,
+                },
+                isDeleted: groupEquipment.is_deleted,
+                isActive: groupEquipment.is_active,
+                createdAt: groupEquipment.createdAt,
+                updatedAt: groupEquipment.updatedAt,
+            })),
+            meta: {
+                currentPage: parseInt(page),
+                itemPerPage: parseInt(limit),
+                totalItems: groupEquipmentList.count,
+                totalPages: Math.ceil(groupEquipmentList.count / limit),
+            },
+        };
+    };
+
+    static getGroupEquipmentByCode = async (groupEquipmentCode) => {
+        const groupEquipment = await database.GroupEquipment.findOne({
+            where: { group_equipment_code: groupEquipmentCode },
+            include: [
+                {
+                    model: database.EquipmentType,
+                    as: 'EquipmentType',
+                    attributes: ['equipment_type_name', 'id'],
+                },
+                {
+                    model: database.UnitOfMeasure,
+                    as: 'UnitOfMeasure',
+                    attributes: ['unit_of_measure_name', 'id'],
+                },
+                {
+                    model: database.EquipmentManufacturer,
+                    as: 'EquipmentManufacturer',
+                    attributes: ['manufacturer_name', 'id'],
+                },
+            ],
+        });
+        if (!groupEquipment) {
+            throw new BadRequestError('Group equipment not found');
+        }
+        return {
+            code: 200,
+            message: 'Get group equipment by code successfully',
+            metadata: {
+                code: groupEquipment.group_equipment_code,
+                name: groupEquipment.group_equipment_name,
+                description: groupEquipment.group_equipment_description,
+                unitOfMeasure: {
+                    id: groupEquipment.UnitOfMeasure.id,
+                    name: groupEquipment.UnitOfMeasure.unit_of_measure_name,
+                },
+                type: {
+                    id: groupEquipment.EquipmentType.id,
+                    name: groupEquipment.EquipmentType.equipment_type_name,
+                },
+                manufacturer: {
+                    id: groupEquipment.EquipmentManufacturer.id,
+                    name: groupEquipment.EquipmentManufacturer
+                        .manufacturer_name,
+                },
+                isDeleted: groupEquipment.is_deleted,
+                isActive: groupEquipment.is_active,
+                createdAt: groupEquipment.createdAt,
+                updatedAt: groupEquipment.updatedAt,
+            },
+        };
+    };
+}
+
+module.exports = GroupEquipmentService;

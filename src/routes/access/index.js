@@ -46,35 +46,6 @@ const router = express.Router();
  *       400:
  *         description: Username already registered or role not found
  */
-
-/**
- * @swagger
- * /signup-customer:
- *   post:
- *     summary: User signup as customer
- *     tags: [Access]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - username
- *               - password
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *                 format: password
- *     responses:
- *       201:
- *         description: Customer account created
- *       400:
- *         description: Username already registered or error in key generation
- */
-
 /**
  * @swagger
  * /login:
@@ -129,10 +100,102 @@ const router = express.Router();
  *       400:
  *         description: Invalid user code
  */
+/**
+ * @swagger
+ * /refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Access]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh token previously issued
+ *     responses:
+ *       200:
+ *         description: New token pair generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tokens:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                     refreshToken:
+ *                       type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     userCode:
+ *                       type: string
+ *                     username:
+ *                       type: string
+ *       403:
+ *         description: Refresh token has been used or is invalid
+ *       404:
+ *         description: Refresh token not found or expired
+ */
+/**
+ * @swagger
+ * /refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Access]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh token previously issued
+ *     responses:
+ *       200:
+ *         description: New token pair generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tokens:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                     refreshToken:
+ *                       type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     userCode:
+ *                       type: string
+ *                     username:
+ *                       type: string
+ *       403:
+ *         description: Refresh token has been used or is invalid
+ *       404:
+ *         description: Refresh token not found or expired
+ */
 
 router.post('/signup', asyncHandler(accessController.signUp));
 router.post('/login', asyncHandler(accessController.login));
 
 // router.use(authenticationV2);
+router.post('/logout', asyncHandler(accessController.logout));
+router.post('/refresh-token', asyncHandler(accessController.refreshToken));
 
 module.exports = router;

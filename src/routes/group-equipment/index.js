@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const equipmentController = require('../../controllers/equipment.controller');
+const groupEquipmentController = require('../../controllers/groupEquipment.controller');
 const { asyncHandler } = require('../../helpers/asyncHandler');
 const { authenticationV2 } = require('../../auth/authUtils');
 
@@ -10,8 +10,8 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Equipment
- *   description: Equipment management APIs
+ *   name: GroupEquipment
+ *   description: Group Equipment management APIs
  */
 
 /**
@@ -32,7 +32,7 @@ const router = express.Router();
  *           type: integer
  *         name:
  *           type: string
- *     Equipment:
+ *     GroupEquipment:
  *       type: object
  *       properties:
  *         code:
@@ -59,10 +59,15 @@ const router = express.Router();
 
 /**
  * @swagger
- * /equipment:
+ * /group-equipment:
  *   post:
- *     summary: Create a new equipment
- *     tags: [Equipment]
+ *     summary: Create a new group equipment
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *     tags: [GroupEquipment]
  *     requestBody:
  *       required: true
  *       content:
@@ -80,19 +85,24 @@ const router = express.Router();
  *                 $ref: '#/components/schemas/UnitOfMeasureInput'
  *     responses:
  *       200:
- *         description: Equipment created successfully
+ *         description: Group equipment created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Equipment'
+ *               $ref: '#/components/schemas/GroupEquipment'
  */
 
 /**
  * @swagger
- * /equipment:
+ * /group-equipment:
  *   put:
- *     summary: Update an existing equipment
- *     tags: [Equipment]
+ *     summary: Update an existing group equipment
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *     tags: [GroupEquipment]
  *     requestBody:
  *       required: true
  *       content:
@@ -100,53 +110,60 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               equipmentCode:
+ *               code:
  *                 type: string
- *               equipmentName:
- *                 type: string
- *               equipmentDescription:
+ *               name:
+ *                 $ref: '#/components/schemas/EquipmentTypeInput'
+ *               description:
  *                 type: string
  *               equipmentType:
  *                 type: string
  *               unitOfMeasure:
- *                 type: string
+ *                 $ref: '#/components/schemas/UnitOfMeasureInput'
  *     responses:
  *       200:
- *         description: Equipment updated successfully
+ *         description: Group equipment updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Equipment'
+ *               $ref: '#/components/schemas/GroupEquipment'
  */
 
 /**
  * @swagger
- * /equipment/{equipmentCode}:
+ * /group-equipment/{groupEquipmentCode}:
  *   get:
- *     summary: Get equipment by code
- *     tags: [Equipment]
+ *     summary: Get group equipment by code
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
- *         name: equipmentCode
+ *         name: groupEquipmentCode
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [GroupEquipment]
  *     responses:
  *       200:
- *         description: Equipment retrieved successfully
+ *         description: Group equipment retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Equipment'
+ *               $ref: '#/components/schemas/GroupEquipment'
  */
 
 /**
  * @swagger
- * /equipment:
+ * /group-equipment:
  *   get:
- *     summary: Get all equipment
- *     tags: [Equipment]
+ *     summary: Get all group equipment
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -155,9 +172,10 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [GroupEquipment]
  *     responses:
  *       200:
- *         description: List of equipment retrieved successfully
+ *         description: List of group equipment retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -166,7 +184,7 @@ const router = express.Router();
  *                 metadata:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Equipment'
+ *                     $ref: '#/components/schemas/GroupEquipment'
  *                 meta:
  *                   type: object
  *                   properties:
@@ -182,54 +200,62 @@ const router = express.Router();
 
 /**
  * @swagger
- * /equipment/{equipmentCode}:
+ * /group-equipment/{groupEquipmentCode}:
  *   delete:
- *     summary: Delete an equipment (soft delete)
- *     tags: [Equipment]
+ *     summary: Delete a group equipment (soft delete)
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
- *         name: equipmentCode
+ *         name: groupEquipmentCode
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [GroupEquipment]
  *     responses:
  *       200:
- *         description: Equipment deleted successfully
+ *         description: Group equipment deleted successfully
  */
 
 /**
  * @swagger
- * /equipment/deactivate/{equipmentCode}:
+ * /group-equipment/deactivate/{groupEquipmentCode}:
  *   patch:
- *     summary: Deactivate an equipment
- *     tags: [Equipment]
+ *     summary: Deactivate a group equipment
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
- *         name: equipmentCode
+ *         name: groupEquipmentCode
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [GroupEquipment]
  *     responses:
  *       200:
- *         description: Equipment deactivated successfully
+ *         description: Group equipment deactivated successfully
  */
 
-// router.use(authenticationV2);
+router.use(authenticationV2);
 
-router.post('', asyncHandler(equipmentController.createNewEquipment));
-router.put('', asyncHandler(equipmentController.updateEquipment));
+router.post('', asyncHandler(groupEquipmentController.createNewGroupEquipment));
+router.put('', asyncHandler(groupEquipmentController.updateGroupEquipment));
 router.get(
-    '/:equipmentCode',
-    asyncHandler(equipmentController.getEquipmentByCode),
+    '/:groupEquipmentCode',
+    asyncHandler(groupEquipmentController.getGroupEquipmentByCode),
 );
-router.get('', asyncHandler(equipmentController.getAllEquipment));
+router.get('', asyncHandler(groupEquipmentController.getAllGroupEquipment));
 router.delete(
-    '/:equipmentCode',
-    asyncHandler(equipmentController.deleteEquipment),
+    '/:groupEquipmentCode',
+    asyncHandler(groupEquipmentController.deleteGroupEquipment),
 );
 router.patch(
-    '/deactivate/:equipmentCode',
-    asyncHandler(equipmentController.deactivateEquipment),
+    '/deactivate/:groupEquipmentCode',
+    asyncHandler(groupEquipmentController.deactivateGroupEquipment),
 );
 
 module.exports = router;

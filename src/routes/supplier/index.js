@@ -9,11 +9,45 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Supplier:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         address:
+ *           type: string
+ *         phone:
+ *           type: string
+ *         email:
+ *           type: string
+ *         isActive:
+ *           type: boolean
+ *         isDeleted:
+ *           type: boolean
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
  * /supplier:
  *   get:
  *     summary: Get all suppliers
- *     tags: [Suppliers]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -26,6 +60,7 @@ const router = express.Router();
  *           type: integer
  *           default: 20
  *         description: Number of items per page
+ *     tags: [Suppliers]
  *     responses:
  *       200:
  *         description: List of suppliers
@@ -52,11 +87,17 @@ const router = express.Router();
  *                       items:
  *                         $ref: '#/components/schemas/Supplier'
  */
+
 /**
  * @swagger
  * /supplier:
  *   post:
  *     summary: Create a new supplier
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Suppliers]
  *     requestBody:
  *       required: true
@@ -83,19 +124,24 @@ const router = express.Router();
  *       400:
  *         description: Invalid input
  */
+
 /**
  * @swagger
  * /supplier/{id}:
  *   put:
  *     summary: Update a supplier
- *     tags: [Suppliers]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
  *         required: true
  *         description: Supplier ID
+ *     tags: [Suppliers]
  *     requestBody:
  *       required: true
  *       content:
@@ -119,38 +165,48 @@ const router = express.Router();
  *       400:
  *         description: Invalid input
  */
+
 /**
  * @swagger
  * /supplier/{id}:
  *   delete:
  *     summary: Delete a supplier
- *     tags: [Suppliers]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
  *         required: true
  *         description: Supplier ID
+ *     tags: [Suppliers]
  *     responses:
  *       200:
  *         description: Supplier deleted successfully
  *       404:
  *         description: Supplier not found
  */
+
 /**
  * @swagger
  * /supplier/{id}:
  *   get:
  *     summary: Get a supplier by ID
- *     tags: [Suppliers]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
  *         description: Supplier ID
+ *     tags: [Suppliers]
  *     responses:
  *       200:
  *         description: Supplier retrieved successfully
@@ -183,6 +239,8 @@ const router = express.Router();
  *       404:
  *         description: Supplier not found
  */
+
+router.use(authenticationV2);
 
 router.get('/:id', asyncHandler(supplierController.getSupplierById));
 router.get('', asyncHandler(supplierController.getAllSupplier));
