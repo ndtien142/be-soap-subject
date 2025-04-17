@@ -174,14 +174,14 @@ database.LiquidationReceipt.belongsTo(database.Account, {
     as: 'account',
 });
 
-database.LiquidationReceipt.belongsToMany(database.GroupEquipment, {
+database.LiquidationReceipt.belongsToMany(database.Equipment, {
     through: LiquidationReceiptDetail,
     foreignKey: 'liquidation_receipt_id',
-    as: 'group_equipment',
+    as: 'equipment',
 });
-database.GroupEquipment.belongsToMany(database.LiquidationReceipt, {
+database.Equipment.belongsToMany(database.LiquidationReceipt, {
     through: LiquidationReceiptDetail,
-    foreignKey: 'group_equipment_code',
+    foreignKey: 'serial_number',
     as: 'liquidation_receipts',
 });
 
@@ -195,14 +195,14 @@ database.TransferReceipt.belongsTo(database.Room, {
 database.TransferReceipt.belongsTo(database.Room, {
     foreignKey: 'transfer_to',
 });
-database.TransferReceipt.belongsToMany(database.GroupEquipment, {
+database.TransferReceipt.belongsToMany(database.Equipment, {
     through: TransferReceiptDetail,
     foreignKey: 'transfer_receipt_id',
-    as: 'group_equipment',
+    as: 'equipment',
 });
-database.GroupEquipment.belongsToMany(database.TransferReceipt, {
+database.Equipment.belongsToMany(database.TransferReceipt, {
     through: TransferReceiptDetail,
-    foreignKey: 'group_equipment_code',
+    foreignKey: 'serial_number',
     as: 'transfer_receipts',
 });
 

@@ -53,9 +53,9 @@ class GroupEquipmentService {
             group_equipment_code: groupEquipmentCode,
             group_equipment_name: name,
             group_equipment_description: description,
-            fk_unit_of_measure_id: unitOfMeasureData.id,
-            fk_equipment_type_id: equipmentTypeData.id,
-            fk_manufacturer_id: manufacturerData.id,
+            unit_of_measure_id: unitOfMeasureData.id,
+            equipment_type_id: equipmentTypeData.id,
+            manufacturer_id: manufacturerData.id,
             is_deleted: false,
             is_active: true,
         });
@@ -147,9 +147,9 @@ class GroupEquipmentService {
 
         groupEquipment.group_equipment_name = name;
         groupEquipment.group_equipment_description = description;
-        groupEquipment.fk_unit_of_measure_id = unitOfMeasureData.id;
-        groupEquipment.fk_equipment_type_id = equipmentTypeData.id;
-        groupEquipment.fk_manufacturer_id = manufacturerData.id;
+        groupEquipment.unit_of_measure_id = unitOfMeasureData.id;
+        groupEquipment.equipment_type_id = equipmentTypeData.id;
+        groupEquipment.manufacturer_id = manufacturerData.id;
 
         await groupEquipment.save();
 

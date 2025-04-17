@@ -35,11 +35,9 @@ class AccessService {
     */
     static login = async ({ username, password, refreshToken = null }) => {
         // 1
-        console.log('username', username);
         const foundAccount = await database.Account.findOne({
             where: { username },
         });
-        console.log('foundAccount', foundAccount);
         if (!foundAccount) throw new BadRequestError('Username not registered');
         // 2
         const matchPassword = await bcrypt.compare(
@@ -281,7 +279,7 @@ class AccessService {
         // 4 - Save refresh token used
         await database.RefreshTokenUsed.create({
             token: refreshToken,
-            fk_user_code: userCode,
+            user_code: userCode,
         });
 
         // 5 - Generate new token pair

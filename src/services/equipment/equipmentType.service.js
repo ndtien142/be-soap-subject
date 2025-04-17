@@ -1,11 +1,11 @@
+const { Op } = require('sequelize');
 const db = require('../../models');
+const { BadRequestError } = require('../../core/error.response');
 
 const { EquipmentType } = db;
 
 class EquipmentTypeService {
     static createNewEquipmentType = async ({ name, description }) => {
-        console.log('name', name);
-        console.log('description', description);
         // Check if the equipment type name already exists
         const existingEquipmentTypeName = await EquipmentType.findOne({
             where: { equipment_type_name: name },
@@ -69,7 +69,7 @@ class EquipmentTypeService {
     };
     static getEquipmentTypeById = async (id) => {
         const equipmentType = await EquipmentType.findOne({
-            where: { id: id },
+            where: { id: id, is_deleted: false },
         });
         if (!equipmentType) {
             throw new BadRequestError('Equipment type not found');
@@ -90,11 +90,22 @@ class EquipmentTypeService {
     };
     static updateEquipmentType = async ({ id, name, description }) => {
         const equipmentType = await EquipmentType.findOne({
-            where: { id: id },
+            where: { id: id, is_deleted: false },
         });
         if (!equipmentType) {
             throw new BadRequestError('Equipment type not found');
         }
+        // Check if the equipment type name already exists
+        const existingEquipmentTypeName = await EquipmentType.findOne({
+            where: {
+                equipment_type_name: name,
+                id: { [Op.ne]: id }, // Exclude the current equipment type
+            },
+        });
+        if (existingEquipmentTypeName) {
+            throw new BadRequestError('Equipment type name already exists');
+        }
+
         equipmentType.equipment_type_name = name;
         equipmentType.equipment_type_description = description;
         await equipmentType.save();
@@ -114,7 +125,7 @@ class EquipmentTypeService {
     };
     static deleteEquipmentType = async (id) => {
         const equipmentType = await EquipmentType.findOne({
-            where: { id: id },
+            where: { id: parseInt(id) },
         });
         if (!equipmentType) {
             throw new BadRequestError('Equipment type not found');

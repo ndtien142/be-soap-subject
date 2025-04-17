@@ -6,14 +6,6 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        transfer_receipt_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        serial_number: {
-            type: DataTypes.STRING(20),
-            allowNull: false,
-        },
         notes: {
             type: DataTypes.TEXT,
             allowNull: true,
