@@ -32,6 +32,13 @@ const router = express.Router();
  *           type: integer
  *         name:
  *           type: string
+ *     ManufacturerInput:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
  *     GroupEquipment:
  *       type: object
  *       properties:
@@ -45,6 +52,8 @@ const router = express.Router();
  *           $ref: '#/components/schemas/UnitOfMeasureInput'
  *         type:
  *           $ref: '#/components/schemas/EquipmentTypeInput'
+ *         manufacturer:
+ *           $ref: '#/components/schemas/ManufacturerInput'
  *         isDeleted:
  *           type: boolean
  *         isActive:
@@ -83,6 +92,8 @@ const router = express.Router();
  *                 type: string
  *               unitOfMeasure:
  *                 $ref: '#/components/schemas/UnitOfMeasureInput'
+ *               manufacturer:
+ *                 $ref: '#/components/schemas/ManufacturerInput'
  *     responses:
  *       200:
  *         description: Group equipment created successfully
@@ -120,6 +131,8 @@ const router = express.Router();
  *                 type: string
  *               unitOfMeasure:
  *                 $ref: '#/components/schemas/UnitOfMeasureInput'
+ *               manufacturer:
+ *                 $ref: '#/components/schemas/ManufacturerInput'
  *     responses:
  *       200:
  *         description: Group equipment updated successfully

@@ -55,7 +55,7 @@ class GroupEquipmentService {
             group_equipment_description: description,
             unit_of_measure_id: unitOfMeasureData.id,
             equipment_type_id: equipmentTypeData.id,
-            manufacturer_id: manufacturerData.id,
+            equipment_manufacturer_id: manufacturerData.id,
             is_deleted: false,
             is_active: true,
         });
@@ -149,7 +149,7 @@ class GroupEquipmentService {
         groupEquipment.group_equipment_description = description;
         groupEquipment.unit_of_measure_id = unitOfMeasureData.id;
         groupEquipment.equipment_type_id = equipmentTypeData.id;
-        groupEquipment.manufacturer_id = manufacturerData.id;
+        groupEquipment.equipment_manufacturer_id = manufacturerData.id;
 
         await groupEquipment.save();
 
@@ -227,17 +227,17 @@ class GroupEquipmentService {
                 include: [
                     {
                         model: database.EquipmentType,
-                        as: 'EquipmentType',
+                        as: 'equipment_type',
                         attributes: ['equipment_type_name', 'id'],
                     },
                     {
                         model: database.UnitOfMeasure,
-                        as: 'UnitOfMeasure',
+                        as: 'unit_of_measure',
                         attributes: ['unit_of_measure_name', 'id'],
                     },
                     {
                         model: database.EquipmentManufacturer,
-                        as: 'EquipmentManufacturer',
+                        as: 'equipment_manufacturer',
                         attributes: ['manufacturer_name', 'id'],
                     },
                 ],
@@ -253,16 +253,16 @@ class GroupEquipmentService {
                 name: groupEquipment.group_equipment_name,
                 description: groupEquipment.group_equipment_description,
                 unitOfMeasure: {
-                    id: groupEquipment.UnitOfMeasure.id,
-                    name: groupEquipment.UnitOfMeasure.unit_of_measure_name,
+                    id: groupEquipment.unit_of_measure.id,
+                    name: groupEquipment.unit_of_measure.unit_of_measure_name,
                 },
                 type: {
-                    id: groupEquipment.EquipmentType.id,
-                    name: groupEquipment.EquipmentType.equipment_type_name,
+                    id: groupEquipment.equipment_type.id,
+                    name: groupEquipment.equipment_type.equipment_type_name,
                 },
                 manufacturer: {
-                    id: groupEquipment.EquipmentManufacturer.id,
-                    name: groupEquipment.EquipmentManufacturer
+                    id: groupEquipment.equipment_manufacturer.id,
+                    name: groupEquipment.equipment_manufacturer
                         .manufacturer_name,
                 },
                 isDeleted: groupEquipment.is_deleted,
@@ -280,22 +280,23 @@ class GroupEquipmentService {
     };
 
     static getGroupEquipmentByCode = async (groupEquipmentCode) => {
+        console.log('groupEquipmentCode', groupEquipmentCode);
         const groupEquipment = await database.GroupEquipment.findOne({
             where: { group_equipment_code: groupEquipmentCode },
             include: [
                 {
                     model: database.EquipmentType,
-                    as: 'EquipmentType',
+                    as: 'equipment_type',
                     attributes: ['equipment_type_name', 'id'],
                 },
                 {
                     model: database.UnitOfMeasure,
-                    as: 'UnitOfMeasure',
+                    as: 'unit_of_measure',
                     attributes: ['unit_of_measure_name', 'id'],
                 },
                 {
                     model: database.EquipmentManufacturer,
-                    as: 'EquipmentManufacturer',
+                    as: 'equipment_manufacturer',
                     attributes: ['manufacturer_name', 'id'],
                 },
             ],
@@ -311,16 +312,16 @@ class GroupEquipmentService {
                 name: groupEquipment.group_equipment_name,
                 description: groupEquipment.group_equipment_description,
                 unitOfMeasure: {
-                    id: groupEquipment.UnitOfMeasure.id,
-                    name: groupEquipment.UnitOfMeasure.unit_of_measure_name,
+                    id: groupEquipment.unit_of_measure.id,
+                    name: groupEquipment.unit_of_measure.unit_of_measure_name,
                 },
                 type: {
-                    id: groupEquipment.EquipmentType.id,
-                    name: groupEquipment.EquipmentType.equipment_type_name,
+                    id: groupEquipment.equipment_type.id,
+                    name: groupEquipment.equipment_type.equipment_type_name,
                 },
                 manufacturer: {
-                    id: groupEquipment.EquipmentManufacturer.id,
-                    name: groupEquipment.EquipmentManufacturer
+                    id: groupEquipment.equipment_manufacturer.id,
+                    name: groupEquipment.equipment_manufacturer
                         .manufacturer_name,
                 },
                 isDeleted: groupEquipment.is_deleted,
