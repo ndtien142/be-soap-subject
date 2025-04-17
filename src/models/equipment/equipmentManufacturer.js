@@ -6,7 +6,7 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        manufacturer_id: {
+        id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,

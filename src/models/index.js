@@ -96,82 +96,119 @@ database.TransferReceiptDetail = TransferReceiptDetail;
 
 // Define associations
 database.Account.belongsTo(database.Role, {
-    foreignKey: 'fk_role_id',
+    foreignKey: 'role_id',
     as: 'role',
 });
-database.KeyToken.belongsTo(database.Account, { foreignKey: 'fk_user_code' });
+database.KeyToken.belongsTo(database.Account, {
+    foreignKey: 'user_code',
+    as: 'account',
+});
 database.RefreshTokenUsed.belongsTo(database.KeyToken, {
-    foreignKey: 'fk_user_code',
-    targetKey: 'fk_user_code',
+    foreignKey: 'user_code',
+    targetKey: 'user_code',
+    as: 'key_token',
 });
 database.Permission.belongsToMany(database.Role, {
     through: 'tb_role_permission',
-    foreignKey: 'fk_permission_id',
+    foreignKey: 'permission_id',
+    as: 'roles',
 });
 database.Role.belongsToMany(database.Permission, {
     through: 'tb_role_permission',
-    foreignKey: 'fk_role_id',
+    foreignKey: 'role_id',
+    as: 'permissions',
 });
 
 // Equipment associations
-database.Equipment.belongsTo(database.EquipmentType, {
-    foreignKey: 'fk_equipment_type_id',
+database.GroupEquipment.belongsTo(database.EquipmentType, {
+    foreignKey: 'equipment_type_id',
+    as: 'equipment_type',
 });
 
-database.Equipment.belongsTo(database.UnitOfMeasure, {
-    foreignKey: 'fk_unit_of_measure_id',
+database.GroupEquipment.belongsTo(database.UnitOfMeasure, {
+    foreignKey: 'unit_of_measure_id',
+    as: 'unit_of_measure',
+});
+
+database.GroupEquipment.belongsTo(database.EquipmentManufacturer, {
+    foreignKey: 'equipment_manufacturer_id',
+    as: 'equipment_manufacturer',
 });
 
 database.Equipment.belongsTo(database.GroupEquipment, {
-    foreignKey: 'fk_group_equipment_code',
+    foreignKey: 'group_equipment_code',
+    as: 'group_equipment',
 });
 
 // Import receipt associations
 database.Supplier.hasMany(database.ImportReceipt, {
-    foreignKey: 'fk_supplier_id',
+    foreignKey: 'supplier_id',
 });
 database.ImportReceipt.belongsTo(database.Supplier, {
-    foreignKey: 'fk_supplier_id',
+    foreignKey: 'supplier_id',
 });
 
 database.ImportReceipt.belongsTo(database.Account, {
-    foreignKey: 'fk_user_code',
+    foreignKey: 'user_code',
 });
 
-database.ImportReceipt.belongsToMany(GroupEquipment, {
+database.ImportReceipt.belongsToMany(database.GroupEquipment, {
     through: DetailImportReceipt,
+    foreignKey: 'import_receipt_id',
+    as: 'group_equipment',
+});
+database.GroupEquipment.belongsToMany(database.ImportReceipt, {
+    through: DetailImportReceipt,
+    foreignKey: 'group_equipment_code',
+    as: 'import_receipts',
 });
 
 database.Equipment.belongsTo(ImportReceipt, {
-    foreignKey: 'fk_import_receipt_id',
+    foreignKey: 'import_receipt_id',
+    as: 'import_receipt',
 });
 
 // Liquidation receipt associations
 database.LiquidationReceipt.belongsTo(database.Account, {
-    foreignKey: 'fk_user_code',
+    foreignKey: 'user_code',
+    as: 'account',
 });
 
-database.LiquidationReceipt.belongsToMany(GroupEquipment, {
+database.LiquidationReceipt.belongsToMany(database.Equipment, {
     through: LiquidationReceiptDetail,
+    foreignKey: 'liquidation_receipt_id',
+    as: 'equipment',
+});
+database.Equipment.belongsToMany(database.LiquidationReceipt, {
+    through: LiquidationReceiptDetail,
+    foreignKey: 'serial_number',
+    as: 'liquidation_receipts',
 });
 
 // Transfer receipt associations
 database.TransferReceipt.belongsTo(database.Account, {
-    foreignKey: 'fk_user_code',
+    foreignKey: 'user_code',
 });
 database.TransferReceipt.belongsTo(database.Room, {
-    foreignKey: 'fk_transfer_from',
+    foreignKey: 'transfer_from',
 });
 database.TransferReceipt.belongsTo(database.Room, {
-    foreignKey: 'fk_transfer_to',
+    foreignKey: 'transfer_to',
 });
-database.TransferReceipt.belongsToMany(GroupEquipment, {
+database.TransferReceipt.belongsToMany(database.Equipment, {
     through: TransferReceiptDetail,
+    foreignKey: 'transfer_receipt_id',
+    as: 'equipment',
+});
+database.Equipment.belongsToMany(database.TransferReceipt, {
+    through: TransferReceiptDetail,
+    foreignKey: 'serial_number',
+    as: 'transfer_receipts',
 });
 
 // Department associations
 database.Room.belongsTo(database.Department, {
-    foreignKey: 'fk_department_id',
+    foreignKey: 'department_id',
 });
 
 // Sync the models with the database

@@ -6,7 +6,7 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        fk_user_code: {
+        user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },

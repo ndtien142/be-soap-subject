@@ -14,7 +14,7 @@ const createAccount = async ({
         user_code: userCode,
         username: username,
         password: password,
-        fk_role_id: roleId,
+        role_id: roleId,
         is_active: isActive,
         is_block: isBlock,
         create_time: createTimestamp,

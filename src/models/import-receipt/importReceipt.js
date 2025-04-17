@@ -24,11 +24,11 @@ function model(sequelize) {
             type: DataTypes.DATE,
             allowNull: true,
         },
-        fk_supplier_id: {
+        supplier_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        fk_user_code: {
+        user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },

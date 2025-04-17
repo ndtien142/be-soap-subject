@@ -8,7 +8,7 @@ class EquipmentManufacturerService {
         // Check if the manufacturer name already exists
         const existingManufacturer =
             await database.EquipmentManufacturer.findOne({
-                where: { manufacturer_name: name },
+                where: { manufacturer_name: name, is_active: true },
             });
         if (existingManufacturer) {
             throw new BadRequestError('Manufacturer name already exists');
@@ -25,7 +25,7 @@ class EquipmentManufacturerService {
             code: 200,
             message: 'Manufacturer created successfully',
             metadata: {
-                id: newManufacturer.manufacturer_id,
+                id: newManufacturer.id,
                 name: newManufacturer.manufacturer_name,
                 contactInfo: newManufacturer.contact_info,
                 address: newManufacturer.address,
@@ -48,7 +48,18 @@ class EquipmentManufacturerService {
             await database.EquipmentManufacturer.findOne({
                 where: { manufacturer_name: name },
             });
-        if (existingManufacturer && existingManufacturer.id !== id) {
+        console.log(
+            existingManufacturer.id,
+            ' ',
+            'typeof',
+            typeof existingManufacturer.id,
+            'typeof id',
+            typeof id,
+        );
+        if (
+            existingManufacturer &&
+            parseInt(existingManufacturer.id) !== parseInt(id)
+        ) {
             throw new BadRequestError('Manufacturer name already exists');
         }
 
@@ -61,7 +72,7 @@ class EquipmentManufacturerService {
             code: 200,
             message: 'Manufacturer updated successfully',
             metadata: {
-                id: manufacturer.manufacturer_id,
+                id: manufacturer.id,
                 name: manufacturer.manufacturer_name,
                 contactInfo: manufacturer.contact_info,
                 address: manufacturer.address,
@@ -95,6 +106,10 @@ class EquipmentManufacturerService {
             await database.EquipmentManufacturer.findAndCountAll({
                 limit: parseInt(limit),
                 offset,
+                where: {
+                    is_active: true,
+                },
+                order: [['create_time', 'DESC']],
             });
 
         return {
@@ -102,7 +117,7 @@ class EquipmentManufacturerService {
             message: 'Get all manufacturers successfully',
             metadata: manufacturers.rows.map((manufacturer) => {
                 return {
-                    id: manufacturer.manufacturer_id,
+                    id: manufacturer.id,
                     name: manufacturer.manufacturer_name,
                     contactInfo: manufacturer.contact_info,
                     address: manufacturer.address,
@@ -126,11 +141,15 @@ class EquipmentManufacturerService {
             throw new BadRequestError('Manufacturer not found');
         }
 
+        if (manufacturer.is_active === false) {
+            throw new BadRequestError('Manufacturer id not found');
+        }
+
         return {
             code: 200,
             message: 'Get manufacturer by ID successfully',
             metadata: {
-                id: manufacturer.manufacturer_id,
+                id: manufacturer.id,
                 name: manufacturer.manufacturer_name,
                 contactInfo: manufacturer.contact_info,
                 address: manufacturer.address,

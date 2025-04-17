@@ -66,7 +66,7 @@ class UnitOfMeasureService {
     };
     static getUnitOfMeasureById = async (id) => {
         const unitOfMeasure = await database.UnitOfMeasure.findOne({
-            where: { id: id },
+            where: { id: id, is_deleted: false },
         });
         if (!unitOfMeasure) {
             throw new BadRequestError('Unit of measure not found');
@@ -87,7 +87,7 @@ class UnitOfMeasureService {
     };
     static updateUnitOfMeasure = async ({ id, name, description }) => {
         const unitOfMeasure = await database.UnitOfMeasure.findOne({
-            where: { id: id },
+            where: { id: id, is_deleted: false },
         });
         if (!unitOfMeasure) {
             throw new BadRequestError('Unit of measure not found');

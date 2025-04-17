@@ -11,7 +11,7 @@ function model(sequelize) {
             primaryKey: true,
             allowNull: false,
         },
-        fk_group_equipment_code: {
+        group_equipment_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
@@ -38,7 +38,7 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 'available',
         },
-        fk_import_receipt_id: {
+        import_receipt_id: {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
