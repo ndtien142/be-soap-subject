@@ -6,29 +6,42 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        equipment_code: {
+        serial_number: {
             type: DataTypes.STRING(20),
             primaryKey: true,
             allowNull: false,
         },
-        equipment_name: {
-            type: DataTypes.STRING(255),
+        fk_group_equipment_code: {
+            type: DataTypes.STRING(20),
             allowNull: false,
         },
-        fk_equipment_type_id: {
-            type: DataTypes.TINYINT,
-            allowNull: false,
+        day_of_first_use: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
-        equipment_manufacturer: {
+        equipment_description: {
             type: DataTypes.STRING(255),
             allowNull: true,
         },
-        is_active: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: true,
+        equipment_location: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
         },
-        is_deleted: { type: DataTypes.BOOLEAN, allowNull: false },
+        status: {
+            type: DataTypes.ENUM(
+                'available',
+                'in_use',
+                'under_maintenance',
+                'out_of_service',
+                'liquidation',
+            ),
+            allowNull: false,
+            defaultValue: 'available',
+        },
+        fk_import_receipt_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
     };
 
     const options = {

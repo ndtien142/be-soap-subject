@@ -9,7 +9,10 @@ function model(sequelize) {
         token: {
             type: DataTypes.TEXT,
             allowNull: false,
-            // unique: true,
+        },
+        fk_user_code: {
+            type: DataTypes.STRING(50),
+            allowNull: false,
         },
     };
 

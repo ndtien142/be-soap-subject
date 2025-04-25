@@ -45,8 +45,11 @@ const router = express.Router();
  * /import-receipt:
  *   get:
  *     summary: Get all import receipts
- *     tags: [Import Receipts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -59,6 +62,7 @@ const router = express.Router();
  *           type: integer
  *           default: 20
  *         description: Number of items per page
+ *     tags: [Import Receipts]
  *     responses:
  *       200:
  *         description: List of import receipts
@@ -91,6 +95,11 @@ const router = express.Router();
  * /import-receipt:
  *   post:
  *     summary: Create a new import receipt
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Import Receipts]
  *     requestBody:
  *       required: true
@@ -149,14 +158,18 @@ const router = express.Router();
  * /import-receipt/{id}:
  *   get:
  *     summary: Get import receipt details by ID
- *     tags: [Import Receipts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
  *         description: Import receipt ID
+ *     tags: [Import Receipts]
  *     responses:
  *       200:
  *         description: Import receipt details retrieved successfully
@@ -173,14 +186,18 @@ const router = express.Router();
  * /import-receipt/{id}/status:
  *   put:
  *     summary: Update the status of an import receipt
- *     tags: [Import Receipts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
  *         description: Import receipt ID
+ *     tags: [Import Receipts]
  *     requestBody:
  *       required: true
  *       content:
@@ -206,20 +223,26 @@ const router = express.Router();
  * /import-receipt/{id}/process:
  *   post:
  *     summary: Process an approved import receipt
- *     tags: [Import Receipts]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
  *         description: Import receipt ID
+ *     tags: [Import Receipts]
  *     responses:
  *       200:
  *         description: Import receipt processed successfully
  *       400:
  *         description: Cannot process the receipt
  */
+
+router.use(authenticationV2);
 
 router.get('', asyncHandler(importReceiptController.getAllImportReceipts));
 router.post('', asyncHandler(importReceiptController.createNewImportReceipt));

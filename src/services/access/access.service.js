@@ -41,7 +41,6 @@ class AccessService {
         });
         console.log('foundAccount', foundAccount);
         if (!foundAccount) throw new BadRequestError('Username not registered');
-        console.log('why');
         // 2
         const matchPassword = await bcrypt.compare(
             password,
@@ -247,6 +246,83 @@ class AccessService {
         return {
             code: 201,
             metadata: null,
+        };
+    };
+
+    static handlerRefreshToken = async ({ refreshToken }) => {
+        // 1 - check refresh token used in database
+        const isUsed = await database.RefreshTokenUsed.findOne({
+            where: { token: refreshToken },
+        });
+        if (isUsed) {
+            throw new ForbiddenError('Refresh token has been used before.');
+        }
+
+        // 2 - find key token for this refresh token
+        const keyToken = await database.KeyToken.findOne({
+            where: { refreshToken },
+        });
+
+        if (!keyToken) {
+            throw new NotFoundError(
+                'Key token not found or invalid refresh token.',
+            );
+        }
+
+        // 3 - Verify refresh token
+        let decoded;
+        try {
+            decoded = await verifyJWT(refreshToken, keyToken.publicKey);
+        } catch (err) {
+            throw new ForbiddenError('Refresh token verification failed.');
+        }
+        const { userCode, username } = decoded;
+
+        // 4 - Save refresh token used
+        await database.RefreshTokenUsed.create({
+            token: refreshToken,
+            fk_user_code: userCode,
+        });
+
+        // 5 - Generate new token pair
+        const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 4096,
+            publicKeyEncoding: {
+                type: 'pkcs1',
+                format: 'pem',
+            },
+            privateKeyEncoding: {
+                type: 'pkcs1',
+                format: 'pem',
+            },
+        });
+
+        // 6 - Create new key token
+        const tokens = await createTokenPair(
+            { userCode, username },
+            publicKey,
+            privateKey,
+        );
+        const newKeyToken = await createKeyToken({
+            userCode,
+            refreshToken: tokens.refreshToken,
+            privateKey,
+            publicKey,
+        });
+
+        // 7 - Save new key token to database
+        if (!newKeyToken) {
+            throw new BadRequestError('Failed to create new key token.');
+        }
+        keyToken.refreshToken = tokens.refreshToken;
+        keyToken.publicKey = publicKey;
+        keyToken.privateKey = privateKey;
+        await keyToken.save();
+
+        return {
+            code: 200,
+            tokens: tokens,
+            user: { userCode, username },
         };
     };
 }

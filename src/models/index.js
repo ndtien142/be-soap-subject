@@ -27,11 +27,17 @@ const database = {};
 const Account = require('./user/account')(sequelize);
 const Role = require('./user/role')(sequelize);
 const KeyToken = require('./user/keyToken')(sequelize);
+const RefreshTokenUsed = require('./user/refreshTokenUsed')(sequelize);
+const Permission = require('./user/permission')(sequelize);
+
 //  Import Equipment models
 const Equipment = require('./equipment/equipment')(sequelize);
 const EquipmentType = require('./equipment/equipmentType')(sequelize);
 const UnitOfMeasure = require('./equipment/unitOfMeasure')(sequelize);
-const DetailEquipment = require('./equipment/detailEquipment')(sequelize);
+const EquipmentManufacturer = require('./equipment/equipmentManufacturer')(
+    sequelize,
+);
+const GroupEquipment = require('./equipment/groupEquipment')(sequelize);
 
 // Import models import receipt
 const ImportReceipt = require('./import-receipt/importReceipt')(sequelize);
@@ -39,20 +45,53 @@ const DetailImportReceipt = require('./import-receipt/detailImportReceipt')(
     sequelize,
 );
 const Supplier = require('./import-receipt/supplier')(sequelize);
+// Import models liquidation receipt
+const LiquidationReceipt = require('./liquidation-receipt/liquidationReceipt')(
+    sequelize,
+);
+const LiquidationReceiptDetail =
+    require('./liquidation-receipt/liquidationReceiptDetail')(sequelize);
+
+// Import models department
+const Department = require('./department/department')(sequelize);
+const Room = require('./department/room')(sequelize);
+
+// Import models transfer receipt
+const TransferReceipt = require('./transfer-receipt/transferReceipt')(
+    sequelize,
+);
+const TransferReceiptDetail =
+    require('./transfer-receipt/transferReceiptDetail')(sequelize);
 
 database.Account = Account;
 database.Role = Role;
 database.KeyToken = KeyToken;
+database.RefreshTokenUsed = RefreshTokenUsed;
+database.Permission = Permission;
 
 // Equipment
 database.Equipment = Equipment;
 database.EquipmentType = EquipmentType;
 database.UnitOfMeasure = UnitOfMeasure;
-database.DetailEquipment = DetailEquipment;
+database.EquipmentManufacturer = EquipmentManufacturer;
+database.GroupEquipment = GroupEquipment;
+
 // Import receipt
 database.ImportReceipt = ImportReceipt;
 database.DetailImportReceipt = DetailImportReceipt;
 database.Supplier = Supplier;
+
+// Liquidation receipt
+database.LiquidationReceipt = LiquidationReceipt;
+database.LiquidationReceiptDetail = LiquidationReceiptDetail;
+
+// Department
+database.Department = Department;
+database.Room = Room;
+
+// Transfer receipt
+database.TransferReceipt = TransferReceipt;
+database.TransferReceiptDetail = TransferReceiptDetail;
 
 // Add model to db object
 
@@ -62,6 +101,18 @@ database.Account.belongsTo(database.Role, {
     as: 'role',
 });
 database.KeyToken.belongsTo(database.Account, { foreignKey: 'fk_user_code' });
+database.RefreshTokenUsed.belongsTo(database.KeyToken, {
+    foreignKey: 'fk_user_code',
+    targetKey: 'fk_user_code',
+});
+database.Permission.belongsToMany(database.Role, {
+    through: 'tb_role_permission',
+    foreignKey: 'fk_permission_id',
+});
+database.Role.belongsToMany(database.Permission, {
+    through: 'tb_role_permission',
+    foreignKey: 'fk_role_id',
+});
 
 // Equipment associations
 database.Equipment.belongsTo(database.EquipmentType, {
@@ -72,8 +123,8 @@ database.Equipment.belongsTo(database.UnitOfMeasure, {
     foreignKey: 'fk_unit_of_measure_id',
 });
 
-database.DetailEquipment.belongsTo(database.Equipment, {
-    foreignKey: 'fk_equipment_code',
+database.Equipment.belongsTo(database.GroupEquipment, {
+    foreignKey: 'fk_group_equipment_code',
 });
 
 // Import receipt associations
@@ -88,12 +139,40 @@ database.ImportReceipt.belongsTo(database.Account, {
     foreignKey: 'fk_user_code',
 });
 
-database.ImportReceipt.belongsToMany(Equipment, {
+database.ImportReceipt.belongsToMany(GroupEquipment, {
     through: DetailImportReceipt,
 });
 
-database.DetailEquipment.belongsTo(ImportReceipt, {
+database.Equipment.belongsTo(ImportReceipt, {
     foreignKey: 'fk_import_receipt_id',
+});
+
+// Liquidation receipt associations
+database.LiquidationReceipt.belongsTo(database.Account, {
+    foreignKey: 'fk_user_code',
+});
+
+database.LiquidationReceipt.belongsToMany(GroupEquipment, {
+    through: LiquidationReceiptDetail,
+});
+
+// Transfer receipt associations
+database.TransferReceipt.belongsTo(database.Account, {
+    foreignKey: 'fk_user_code',
+});
+database.TransferReceipt.belongsTo(database.Room, {
+    foreignKey: 'fk_transfer_from',
+});
+database.TransferReceipt.belongsTo(database.Room, {
+    foreignKey: 'fk_transfer_to',
+});
+database.TransferReceipt.belongsToMany(GroupEquipment, {
+    through: TransferReceiptDetail,
+});
+
+// Department associations
+database.Room.belongsTo(database.Department, {
+    foreignKey: 'fk_department_id',
 });
 
 // Sync the models with the database

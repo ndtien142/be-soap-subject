@@ -46,6 +46,11 @@ const router = express.Router();
  * /equipment-type:
  *   post:
  *     summary: Create a new equipment type
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [EquipmentType]
  *     requestBody:
  *       required: true
@@ -74,8 +79,11 @@ const router = express.Router();
  * /equipment-type:
  *   get:
  *     summary: Get all equipment types
- *     tags: [EquipmentType]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -86,6 +94,7 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *         description: Number of items per page
+ *     tags: [EquipmentType]
  *     responses:
  *       200:
  *         description: List of equipment types
@@ -116,14 +125,18 @@ const router = express.Router();
  * /equipment-type/{id}:
  *   get:
  *     summary: Get equipment type by ID
- *     tags: [EquipmentType]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
  *         description: Equipment type ID
+ *     tags: [EquipmentType]
  *     responses:
  *       200:
  *         description: Equipment type data
@@ -140,6 +153,11 @@ const router = express.Router();
  * /equipment-type:
  *   put:
  *     summary: Update an equipment type
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [EquipmentType]
  *     requestBody:
  *       required: true
@@ -173,14 +191,18 @@ const router = express.Router();
  * /equipment-type/{id}:
  *   delete:
  *     summary: Delete an equipment type (soft delete)
- *     tags: [EquipmentType]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
  *         description: Equipment type ID
+ *     tags: [EquipmentType]
  *     responses:
  *       200:
  *         description: Equipment type deleted
@@ -192,6 +214,7 @@ const router = express.Router();
  *         description: Equipment type not found
  */
 
+router.use(authenticationV2);
 router.get('/:id', asyncHandler(equipmentTypeController.getEquipmentTypeById));
 router.get('', asyncHandler(equipmentTypeController.getAllEquipmentType));
 router.post('', asyncHandler(equipmentTypeController.createNewEquipmentType));
