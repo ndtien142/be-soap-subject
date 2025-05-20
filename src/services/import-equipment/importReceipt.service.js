@@ -26,9 +26,9 @@ class ImportReceiptService {
         if (!items || items.length === 0) {
             throw new BadRequestError('No items found');
         }
-        const itemsList = await database.Equipment.findAll({
+        const itemsList = await database.GroupEquipment.findAll({
             where: {
-                equipment_code: items.map((item) => item.code),
+                group_equipment_code: items.map((item) => item.code),
             },
             transaction,
         });

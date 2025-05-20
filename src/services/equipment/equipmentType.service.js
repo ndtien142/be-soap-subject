@@ -1,4 +1,5 @@
 const db = require('../../models');
+const { BadRequestError } = require('../../core/error.response');
 
 const { EquipmentType } = db;
 

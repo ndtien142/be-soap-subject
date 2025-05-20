@@ -1,7 +1,7 @@
 'use strict';
 
-const EquipmentManufacturerService = require('../../services/equipment/equipmentManufacturer.service');
-const { SuccessResponse } = require('../../core/success.response');
+const EquipmentManufacturerService = require('../services/equipment/equipmentManufacturer.service');
+const { SuccessResponse } = require('../core/success.response');
 
 class EquipmentManufacturerController {
     static createManufacturer = async (req, res, next) => {

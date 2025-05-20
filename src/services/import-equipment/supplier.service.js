@@ -37,7 +37,7 @@ class SupplierService {
                 description: newSupplier.supplier_description,
                 address: newSupplier.supplier_address,
                 phone: newSupplier.supplier_phone,
-                email: newSupplier.supplier.email,
+                email: newSupplier.supplier_email,
             },
         };
     };

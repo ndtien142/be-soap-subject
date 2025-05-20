@@ -7,7 +7,7 @@ class GroupEquipmentController {
     createNewGroupEquipment = async (req, res, next) => {
         new CREATED({
             message: 'Create new equipment successfully',
-            metadata: await GroupEquipmentService.createNewEquipment(req.body),
+            metadata: await GroupEquipmentService.createNewGroupEquipment(req.body),
         }).send(res);
     };
     updateGroupEquipment = async (req, res, next) => {

@@ -54,11 +54,24 @@ const findKeyTokenByUserCode = async (userCode) => {
 };
 
 const removeKeyTokenByUserCode = async (userCode) => {
-    const result = await db.KeyToken.destroy({
-        where: { fk_user_code: userCode },
-    });
-    return result;
+    try {
+        // Xóa các bản ghi con trước (ở bảng tb_refresh_token_used)
+        await db.RefreshTokenUsed.destroy({
+            where: { fk_user_code: userCode },
+        });
+
+        // Sau đó mới xóa ở bảng cha
+        const result = await db.KeyToken.destroy({
+            where: { fk_user_code: userCode },
+        });
+
+        return result;
+    } catch (error) {
+        console.error("Lỗi khi xóa KeyToken:", error.message);
+        throw error;
+    }
 };
+
 
 module.exports = {
     createKeyToken,
