@@ -33,11 +33,11 @@ class GroupEquipmentService {
 
         const manufacturerData = await database.EquipmentManufacturer.findOne({
             where: {
-                manufacturer_id: manufacturer.id,      // ✅ đúng tên cột
-                manufacturer_name: manufacturer.name,  // ✅ đúng tên cột
+                manufacturer_id: manufacturer.id, // ✅ đúng tên cột
+                manufacturer_name: manufacturer.name, // ✅ đúng tên cột
             },
         });
-        
+
         if (!manufacturerData) {
             throw new BadRequestError('Manufacturer not found');
         }
@@ -53,15 +53,14 @@ class GroupEquipmentService {
         const newGroupEquipment = await database.GroupEquipment.create({
             group_equipment_code: groupEquipmentCode,
             group_equipment_name: name,
-            // group_equipment_description: description, // nếu muốn lưu mô tả, cần thêm cột này vào model
-            // fk_unit_of_measure_id: unitOfMeasureData.unit_of_measure_id, // nếu model có trường này
-            // fk_equipment_type_id: equipmentTypeData.equipment_type_id,   // nếu model có trường này
-            fk_group_equipment_type_id: equipmentTypeData.id,
-            fk_equipment_manufacturer: manufacturerData.manufacturer_id,
+            group_equipment_description: description,
+            unit_of_measure_id: unitOfMeasureData.id,
+            equipment_type_id: equipmentTypeData.id,
+            equipment_manufacturer_id: manufacturerData.id,
             is_deleted: false,
             is_active: true,
         });
-        
+
         return {
             code: 200,
             message: 'Group equipment created successfully',
@@ -150,9 +149,9 @@ class GroupEquipmentService {
 
         groupEquipment.group_equipment_name = name;
         groupEquipment.group_equipment_description = description;
-        groupEquipment.fk_unit_of_measure_id = unitOfMeasureData.id;
-        groupEquipment.fk_equipment_type_id = equipmentTypeData.id;
-        groupEquipment.fk_manufacturer_id = manufacturerData.id;
+        groupEquipment.unit_of_measure_id = unitOfMeasureData.id;
+        groupEquipment.equipment_type_id = equipmentTypeData.id;
+        groupEquipment.equipment_manufacturer_id = manufacturerData.id;
 
         await groupEquipment.save();
 
@@ -230,17 +229,17 @@ class GroupEquipmentService {
                 include: [
                     {
                         model: database.EquipmentType,
-                        as: 'EquipmentType',
+                        as: 'equipment_type',
                         attributes: ['equipment_type_name', 'id'],
                     },
                     {
                         model: database.UnitOfMeasure,
-                        as: 'UnitOfMeasure',
+                        as: 'unit_of_measure',
                         attributes: ['unit_of_measure_name', 'id'],
                     },
                     {
                         model: database.EquipmentManufacturer,
-                        as: 'EquipmentManufacturer',
+                        as: 'equipment_manufacturer',
                         attributes: ['manufacturer_name', 'id'],
                     },
                 ],
@@ -256,16 +255,16 @@ class GroupEquipmentService {
                 name: groupEquipment.group_equipment_name,
                 description: groupEquipment.group_equipment_description,
                 unitOfMeasure: {
-                    id: groupEquipment.UnitOfMeasure.id,
-                    name: groupEquipment.UnitOfMeasure.unit_of_measure_name,
+                    id: groupEquipment.unit_of_measure.id,
+                    name: groupEquipment.unit_of_measure.unit_of_measure_name,
                 },
                 type: {
-                    id: groupEquipment.EquipmentType.id,
-                    name: groupEquipment.EquipmentType.equipment_type_name,
+                    id: groupEquipment.equipment_type.id,
+                    name: groupEquipment.equipment_type.equipment_type_name,
                 },
                 manufacturer: {
-                    id: groupEquipment.EquipmentManufacturer.id,
-                    name: groupEquipment.EquipmentManufacturer
+                    id: groupEquipment.equipment_manufacturer.id,
+                    name: groupEquipment.equipment_manufacturer
                         .manufacturer_name,
                 },
                 isDeleted: groupEquipment.is_deleted,
@@ -283,22 +282,23 @@ class GroupEquipmentService {
     };
 
     static getGroupEquipmentByCode = async (groupEquipmentCode) => {
+        console.log('groupEquipmentCode', groupEquipmentCode);
         const groupEquipment = await database.GroupEquipment.findOne({
             where: { group_equipment_code: groupEquipmentCode },
             include: [
                 {
                     model: database.EquipmentType,
-                    as: 'EquipmentType',
+                    as: 'equipment_type',
                     attributes: ['equipment_type_name', 'id'],
                 },
                 {
                     model: database.UnitOfMeasure,
-                    as: 'UnitOfMeasure',
+                    as: 'unit_of_measure',
                     attributes: ['unit_of_measure_name', 'id'],
                 },
                 {
                     model: database.EquipmentManufacturer,
-                    as: 'EquipmentManufacturer',
+                    as: 'equipment_manufacturer',
                     attributes: ['manufacturer_name', 'id'],
                 },
             ],
@@ -314,16 +314,16 @@ class GroupEquipmentService {
                 name: groupEquipment.group_equipment_name,
                 description: groupEquipment.group_equipment_description,
                 unitOfMeasure: {
-                    id: groupEquipment.UnitOfMeasure.id,
-                    name: groupEquipment.UnitOfMeasure.unit_of_measure_name,
+                    id: groupEquipment.unit_of_measure.id,
+                    name: groupEquipment.unit_of_measure.unit_of_measure_name,
                 },
                 type: {
-                    id: groupEquipment.EquipmentType.id,
-                    name: groupEquipment.EquipmentType.equipment_type_name,
+                    id: groupEquipment.equipment_type.id,
+                    name: groupEquipment.equipment_type.equipment_type_name,
                 },
                 manufacturer: {
-                    id: groupEquipment.EquipmentManufacturer.id,
-                    name: groupEquipment.EquipmentManufacturer
+                    id: groupEquipment.equipment_manufacturer.id,
+                    name: groupEquipment.equipment_manufacturer
                         .manufacturer_name,
                 },
                 isDeleted: groupEquipment.is_deleted,

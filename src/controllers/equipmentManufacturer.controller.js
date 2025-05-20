@@ -17,7 +17,6 @@ class EquipmentManufacturerController {
         new SuccessResponse({
             message: 'Manufacturer updated successfully',
             metadata: await EquipmentManufacturerService.updateManufacturer({
-                id: req.params.id,
                 ...req.body,
             }),
         }).send(res);

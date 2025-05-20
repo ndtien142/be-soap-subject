@@ -100,8 +100,8 @@ class SupplierService {
         };
     };
 
-    static updateSupplier = async (id, updates) => {
-        const supplier = await database.Supplier.findByPk(id);
+    static updateSupplier = async (updates) => {
+        const supplier = await database.Supplier.findByPk(updates.id);
         if (!supplier) {
             throw new BadRequestError('Supplier not found');
         }

@@ -8,7 +8,7 @@ const createKeyToken = async ({
 }) => {
     try {
         const foundTokens = await db.KeyToken.findOne({
-            where: { fk_user_code: userCode },
+            where: { user_code: userCode },
         });
         if (foundTokens) {
             await updateKeyToken({
@@ -24,7 +24,7 @@ const createKeyToken = async ({
             privateKey,
             publicKey,
             refreshToken,
-            fk_user_code: userCode,
+            user_code: userCode,
         });
 
         return tokens ? tokens.publicKey : null;
@@ -50,7 +50,7 @@ const updateKeyToken = async ({
 };
 
 const findKeyTokenByUserCode = async (userCode) => {
-    return await db.KeyToken.findOne({ where: { fk_user_code: userCode } });
+    return await db.KeyToken.findOne({ where: { user_code: userCode } });
 };
 
 const removeKeyTokenByUserCode = async (userCode) => {
@@ -67,11 +67,10 @@ const removeKeyTokenByUserCode = async (userCode) => {
 
         return result;
     } catch (error) {
-        console.error("Lỗi khi xóa KeyToken:", error.message);
+        console.error('Lỗi khi xóa KeyToken:', error.message);
         throw error;
     }
 };
-
 
 module.exports = {
     createKeyToken,

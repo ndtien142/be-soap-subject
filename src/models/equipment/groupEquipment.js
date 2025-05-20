@@ -15,11 +15,11 @@ function model(sequelize) {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        fk_group_equipment_type_id: {
+        equipment_type_id: {
             type: DataTypes.TINYINT,
             allowNull: false,
         },
-        fk_equipment_manufacturer: {
+        equipment_manufacturer_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

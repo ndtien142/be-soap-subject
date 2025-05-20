@@ -6,14 +6,6 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        fk_import_receipt_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        fk_equipment_code: {
-            type: DataTypes.STRING(20),
-            allowNull: false,
-        },
         price: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,

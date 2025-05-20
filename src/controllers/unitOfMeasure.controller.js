@@ -38,7 +38,7 @@ class UnitOfMeasureController {
         new SuccessResponse({
             message: 'Delete unit of measure successfully',
             metadata: await UnitOfMeasureService.deleteUnitOfMeasure(
-                req.params,
+                req.params.id,
             ),
         }).send(res);
     };

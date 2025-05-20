@@ -49,6 +49,8 @@ const router = express.Router();
  *     UpdateManufacturerInput:
  *       type: object
  *       properties:
+ *         id:
+ *           type: integer
  *         name:
  *           type: string
  *         contactInfo:
@@ -85,7 +87,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /equipment-manufacturer/{id}:
+ * /equipment-manufacturer:
  *   put:
  *     summary: Update an existing manufacturer
  *     tags: [EquipmentManufacturer]

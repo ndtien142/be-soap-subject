@@ -29,7 +29,7 @@ function model(sequelize) {
             defaultValue: 'proposed',
             allowNull: false,
         },
-        fk_user_code: {
+        user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
