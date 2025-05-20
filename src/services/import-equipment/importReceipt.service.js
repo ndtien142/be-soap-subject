@@ -53,10 +53,10 @@ class ImportReceiptService {
         // Create import receipt
         const importReceipt = await database.ImportReceipt.create(
             {
-                fk_supplier_id: supplierData.id,
+                supplier_id: supplierData.id,
                 date_of_order: dateOfOrder,
                 date_of_received: dateOfReceived,
-                fk_user_code: userData.user_code,
+                user_code: userData.user_code,
                 note,
                 status: IMPORT_RECEIPT_STATUS.pending,
             },
@@ -71,8 +71,8 @@ class ImportReceiptService {
                 );
                 return database.DetailImportReceipt.create(
                     {
-                        fk_import_receipt_id: importReceipt.id,
-                        fk_group_equipment_code:
+                        import_receipt_id: importReceipt.id,
+                        group_equipment_code:
                             groupEquipment.group_equipment_code,
                         price: item.price,
                         quantity: item.quantity,
@@ -208,15 +208,15 @@ class ImportReceiptService {
         // Create detail equipment entries for each item
         const createdDetails = [];
         for (const detail of importReceipt.DetailImportReceipts) {
-            const { fk_group_equipment_code, quantity } = detail;
+            const { group_equipment_code, quantity } = detail;
 
             for (let i = 0; i < quantity; i++) {
-                const serialNumber = `${fk_group_equipment_code}-${Date.now()}-${i}`;
+                const serialNumber = `${group_equipment_code}-${Date.now()}-${i}`;
                 const newDetail = await database.Equipment.create({
                     serial_number: serialNumber,
-                    fk_group_equipment_code,
+                    group_equipment_code,
                     status: DETAIL_EQUIPMENT_STATUS.available,
-                    fk_import_receipt_id: importReceiptId,
+                    import_receipt_id: importReceiptId,
                     equipment_description: null,
                     equipment_location: null,
                     day_of_first_use: null,
@@ -254,7 +254,7 @@ class ImportReceiptService {
                     isActive: importReceipt.Account.is_active,
                 },
                 items: importReceipt.DetailImportReceipts.map((detail) => ({
-                    groupEquipmentCode: detail.fk_group_equipment_code,
+                    groupEquipmentCode: detail.group_equipment_code,
                     groupEquipmentName:
                         detail.GroupEquipment.group_equipment_name,
                     price: detail.price,
@@ -262,7 +262,7 @@ class ImportReceiptService {
                 })),
                 createdDetails: createdDetails.map((detail) => ({
                     serialNumber: detail.serial_number,
-                    groupEquipmentCode: detail.fk_group_equipment_code,
+                    groupEquipmentCode: detail.group_equipment_code,
                     status: detail.status,
                     location: detail.equipment_location,
                     description: detail.equipment_description,
@@ -400,7 +400,7 @@ class ImportReceiptService {
                     isActive: importReceipt.Account.is_active,
                 },
                 items: importReceipt.DetailImportReceipts.map((detail) => ({
-                    groupEquipmentCode: detail.fk_group_equipment_code,
+                    groupEquipmentCode: detail.group_equipment_code,
                     groupEquipmentName:
                         detail.GroupEquipment.group_equipment_name,
                     price: detail.price,
