@@ -15,19 +15,19 @@ function model(sequelize) {
             type: DataTypes.DATE,
             allowNull: false,
         },
-        fk_transfer_from: {
+        transfer_from: {
             type: DataTypes.STRING(50),
             allowNull: false,
         },
-        fk_transfer_to: {
+        transfer_to: {
             type: DataTypes.STRING(50),
             allowNull: false,
         },
-        fk_department_id: {
+        department_id: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
-        fk_user_code: {
+        user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },

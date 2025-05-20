@@ -37,7 +37,7 @@ class SupplierService {
                 description: newSupplier.supplier_description,
                 address: newSupplier.supplier_address,
                 phone: newSupplier.supplier_phone,
-                email: newSupplier.supplier.email,
+                email: newSupplier.supplier_email,
             },
         };
     };
@@ -100,8 +100,8 @@ class SupplierService {
         };
     };
 
-    static updateSupplier = async (id, updates) => {
-        const supplier = await database.Supplier.findByPk(id);
+    static updateSupplier = async (updates) => {
+        const supplier = await database.Supplier.findByPk(updates.id);
         if (!supplier) {
             throw new BadRequestError('Supplier not found');
         }

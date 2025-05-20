@@ -127,7 +127,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /supplier/{id}:
+ * /supplier:
  *   put:
  *     summary: Update a supplier
  *     security:
@@ -135,12 +135,6 @@ const router = express.Router();
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: Supplier ID
  *     tags: [Suppliers]
  *     requestBody:
  *       required: true
@@ -149,6 +143,8 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
+ *               id:
+ *                type: number
  *               name:
  *                 type: string
  *               description:
@@ -246,5 +242,6 @@ router.get('/:id', asyncHandler(supplierController.getSupplierById));
 router.get('', asyncHandler(supplierController.getAllSupplier));
 router.post('', asyncHandler(supplierController.createNewSupplier));
 router.put('', asyncHandler(supplierController.updateSupplier));
+router.delete('/:id', asyncHandler(supplierController.deleteSupplier));
 
 module.exports = router;

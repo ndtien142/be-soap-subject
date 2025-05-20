@@ -22,7 +22,7 @@ const router = express.Router();
  *       type: object
  *       properties:
  *         id:
- *           type: string
+ *           type: integer
  *         name:
  *           type: string
  *           description: Name of the equipment type
@@ -170,7 +170,7 @@ const router = express.Router();
  *               - name
  *             properties:
  *               id:
- *                 type: string
+ *                 type: integer
  *               name:
  *                 type: string
  *               description:

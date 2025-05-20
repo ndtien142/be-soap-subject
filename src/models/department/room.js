@@ -15,7 +15,7 @@ function model(sequelize) {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
-        fk_department_id: {
+        department_id: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },

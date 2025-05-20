@@ -17,7 +17,7 @@ function model(sequelize) {
             // unique: true,
         },
         password: { type: DataTypes.STRING(255), allowNull: false },
-        fk_role_id: {
+        role_id: {
             type: DataTypes.TINYINT,
             allowNull: false,
             references: { model: 'tb_role', key: 'id' },
