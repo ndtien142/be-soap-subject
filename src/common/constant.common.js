@@ -1,5 +1,5 @@
 const IMPORT_RECEIPT_STATUS = Object.freeze({
-    pending: 'pending',
+    requested: 'requested',
     approved: 'approved',
     completed: 'completed',
     rejected: 'rejected',

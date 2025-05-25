@@ -62,6 +62,16 @@ const TransferReceipt = require('./transfer-receipt/transferReceipt')(
 const TransferReceiptDetail =
     require('./transfer-receipt/transferReceiptDetail')(sequelize);
 
+// import models borrow receipt
+const BorrowReceipt = require('./borrow-receipt/borrowReceipt')(sequelize);
+const BorrowReceiptDetail = require('./borrow-receipt/borrowReceiptDetail')(
+    sequelize,
+);
+
+// Import models for files and images
+const EquipmentImages = require('./files/equipmentImages')(sequelize);
+const ReceiptFiles = require('./files/receiptFiles')(sequelize);
+
 database.Account = Account;
 database.Role = Role;
 database.KeyToken = KeyToken;
@@ -91,6 +101,14 @@ database.Room = Room;
 // Transfer receipt
 database.TransferReceipt = TransferReceipt;
 database.TransferReceiptDetail = TransferReceiptDetail;
+
+// Borrow receipt
+database.BorrowReceipt = BorrowReceipt;
+database.BorrowReceiptDetail = BorrowReceiptDetail;
+
+// Files and images
+database.EquipmentImages = EquipmentImages;
+database.ReceiptFiles = ReceiptFiles;
 
 // Add model to db object
 
@@ -140,6 +158,11 @@ database.Equipment.belongsTo(database.GroupEquipment, {
     as: 'group_equipment',
 });
 
+database.Equipment.belongsTo(database.Room, {
+    foreignKey: 'room_id',
+    as: 'room',
+});
+
 // Import receipt associations
 database.Supplier.hasMany(database.ImportReceipt, {
     foreignKey: 'supplier_id',
@@ -150,6 +173,11 @@ database.ImportReceipt.belongsTo(database.Supplier, {
 
 database.ImportReceipt.belongsTo(database.Account, {
     foreignKey: 'user_code',
+});
+
+database.ImportReceipt.belongsTo(database.Account, {
+    foreignKey: 'approved_by',
+    as: 'approver',
 });
 
 database.ImportReceipt.belongsToMany(database.GroupEquipment, {
@@ -179,6 +207,12 @@ database.LiquidationReceipt.belongsToMany(database.Equipment, {
     foreignKey: 'liquidation_receipt_id',
     as: 'equipment',
 });
+
+database.LiquidationReceipt.belongsTo(database.Account, {
+    foreignKey: 'approved_by',
+    as: 'approver',
+});
+
 database.Equipment.belongsToMany(database.LiquidationReceipt, {
     through: LiquidationReceiptDetail,
     foreignKey: 'serial_number',
@@ -192,6 +226,10 @@ database.TransferReceipt.belongsTo(database.Account, {
 database.TransferReceipt.belongsTo(database.Room, {
     foreignKey: 'transfer_from',
 });
+database.TransferReceipt.belongsTo(database.Account, {
+    foreignKey: 'approved_by',
+    as: 'approver',
+});
 database.TransferReceipt.belongsTo(database.Room, {
     foreignKey: 'transfer_to',
 });
@@ -204,6 +242,21 @@ database.Equipment.belongsToMany(database.TransferReceipt, {
     through: TransferReceiptDetail,
     foreignKey: 'serial_number',
     as: 'transfer_receipts',
+});
+
+// Borrow receipt associations
+database.BorrowReceipt.belongsTo(database.Account, {
+    foreignKey: 'user_code',
+});
+database.BorrowReceipt.belongsToMany(database.Equipment, {
+    through: BorrowReceiptDetail,
+    foreignKey: 'borrow_receipt_id',
+    as: 'equipment',
+});
+database.Equipment.belongsToMany(database.BorrowReceipt, {
+    through: BorrowReceiptDetail,
+    foreignKey: 'serial_number',
+    as: 'borrow_receipts',
 });
 
 // Department associations

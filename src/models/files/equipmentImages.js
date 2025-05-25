@@ -12,61 +12,56 @@ function model(sequelize) {
             autoIncrement: true,
             allowNull: false,
         },
-        date_of_order: {
-            type: DataTypes.DATE,
+        action_type: {
+            type: DataTypes.ENUM(
+                'import',
+                'transfer',
+                'liquidation',
+                'borrow',
+                'return',
+            ),
             allowNull: false,
         },
-        date_of_received: {
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        date_of_actual_received: {
-            type: DataTypes.DATE,
-            allowNull: true,
-        },
-        supplier_id: {
+        action_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        user_code: {
+        serial_number: {
             type: DataTypes.STRING(20),
             allowNull: false,
         },
-        approve_by: {
-            type: DataTypes.STRING(20),
+        image_url: {
+            type: DataTypes.STRING(255),
             allowNull: true,
         },
         note: {
             type: DataTypes.STRING(1000),
             allowNull: true,
         },
-        status: {
-            type: DataTypes.ENUM(
-                'requested',
-                'approved',
-                'processing',
-                'received',
-                'returned',
-                'rejected',
-            ),
+        uploaded_by: {
+            type: DataTypes.STRING(20),
             allowNull: false,
-            defaultValue: 'requested',
+        },
+        uploaded_at: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW,
         },
     };
 
     const options = {
-        tableName: 'tb_import_receipt',
+        tableName: 'tb_equipment_images',
         freezeTableName: true,
         timestamps: true,
         createdAt: 'create_time',
         updatedAt: 'update_time',
     };
 
-    const ImportReceipt = sequelize.define(
-        'ImportReceipt',
+    const EquipmentImages = sequelize.define(
+        'EquipmentImages',
         attributes,
         options,
     );
 
-    return ImportReceipt;
+    return EquipmentImages;
 }

@@ -58,7 +58,7 @@ class ImportReceiptService {
                 date_of_received: dateOfReceived,
                 user_code: userData.user_code,
                 note,
-                status: IMPORT_RECEIPT_STATUS.pending,
+                status: IMPORT_RECEIPT_STATUS.requested,
             },
             { transaction },
         );
@@ -128,7 +128,7 @@ class ImportReceiptService {
         }
 
         // Validate status transition
-        if (importReceipt.status !== IMPORT_RECEIPT_STATUS.pending) {
+        if (importReceipt.status !== IMPORT_RECEIPT_STATUS.requested) {
             throw new BadRequestError(
                 `Cannot update import receipt with status: ${importReceipt.status}`,
             );
