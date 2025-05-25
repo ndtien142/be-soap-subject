@@ -262,6 +262,7 @@ database.Equipment.belongsToMany(database.BorrowReceipt, {
 // Department associations
 database.Room.belongsTo(database.Department, {
     foreignKey: 'department_id',
+    as: 'department',
 });
 
 // Sync the models with the database

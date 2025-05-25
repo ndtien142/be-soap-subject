@@ -33,9 +33,14 @@ class RoomService {
             code: 200,
             message: 'Room created successfully',
             data: {
-                roomId: room.room_id,
-                roomName: room.room_name,
-                departmentId: room.department_id,
+                id: room.room_id,
+                name: room.room_name,
+                department: {
+                    id: room.department_id,
+                    name: department.department_name,
+                    notes: department.notes,
+                    status: department.status,
+                },
                 notes: room.notes,
                 status: room.status,
                 createdAt: room.create_time,
@@ -105,15 +110,32 @@ class RoomService {
             limit: parseInt(limit),
             offset,
             order: [['create_time', 'DESC']],
+            include: [
+                {
+                    model: database.Department,
+                    as: 'department',
+                    attributes: [
+                        'department_id',
+                        'department_name',
+                        'notes',
+                        'status',
+                    ],
+                },
+            ],
         });
 
         return {
             code: 200,
             message: 'Get all rooms successfully',
             metadata: result.rows.map((r) => ({
-                roomId: r.room_id,
-                roomName: r.room_name,
-                departmentId: r.department_id,
+                id: r.room_id,
+                name: r.room_name,
+                department: {
+                    id: r.department.department_id,
+                    name: r.department.department_name,
+                    notes: r.department.notes,
+                    status: r.department.status,
+                },
                 notes: r.notes,
                 status: r.status,
                 createdAt: r.create_time,
@@ -131,6 +153,18 @@ class RoomService {
     static async getRoomById(roomId) {
         const room = await database.Room.findOne({
             where: { room_id: roomId },
+            include: [
+                {
+                    model: database.Department,
+                    as: 'department',
+                    attributes: [
+                        'department_id',
+                        'department_name',
+                        'notes',
+                        'status',
+                    ],
+                },
+            ],
         });
         if (!room) {
             throw new BadRequestError('Room not found');
@@ -142,7 +176,12 @@ class RoomService {
             data: {
                 roomId: room.room_id,
                 roomName: room.room_name,
-                departmentId: room.department_id,
+                department: {
+                    id: room.department.department_id,
+                    name: room.department.department_name,
+                    notes: room.department.notes,
+                    status: room.department.status,
+                },
                 notes: room.notes,
                 status: room.status,
                 createdAt: room.create_time,
