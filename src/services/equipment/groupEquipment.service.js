@@ -33,10 +33,11 @@ class GroupEquipmentService {
 
         const manufacturerData = await database.EquipmentManufacturer.findOne({
             where: {
-                id: manufacturer.id,
-                manufacturer_name: manufacturer.name,
+                manufacturer_id: manufacturer.id, // ✅ đúng tên cột
+                manufacturer_name: manufacturer.name, // ✅ đúng tên cột
             },
         });
+
         if (!manufacturerData) {
             throw new BadRequestError('Manufacturer not found');
         }
@@ -59,6 +60,7 @@ class GroupEquipmentService {
             is_deleted: false,
             is_active: true,
         });
+
         return {
             code: 200,
             message: 'Group equipment created successfully',

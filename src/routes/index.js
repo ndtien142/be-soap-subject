@@ -13,5 +13,6 @@ router.use(
     '/v1/api/equipment-manufacturer',
     require('./equipment-manufacturer'),
 );
+router.use('/v1/api/equipment', require('./equipment'));
 
 module.exports = router;

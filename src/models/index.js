@@ -8,6 +8,7 @@ const {
 const sequelize = new Sequelize(name, user, password, {
     host: host,
     dialect: dialect,
+    port
 });
 
 sequelize
@@ -266,7 +267,7 @@ database.Room.belongsTo(database.Department, {
 
 // Sync the models with the database
 sequelize
-    .sync({ sync: true })
+    .sync({ sync:true })
     .then(() => {
         console.log('Database & tables created!');
     })
