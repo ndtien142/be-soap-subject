@@ -59,19 +59,14 @@ class SupplierService {
         return {
             code: 200,
             message: 'Get all suppliers success!',
-            metadata: {
-                totalCount: suppliers.count,
-                totalPages: Math.ceil(suppliers.count / limit),
-                currentPage: page,
-                suppliers: suppliers.rows.map((supplier) => ({
-                    id: supplier.id,
-                    name: supplier.supplier_name,
-                    description: supplier.supplier_description,
-                    address: supplier.supplier_address,
-                    phone: supplier.supplier_phone,
-                    email: supplier.supplier_email,
-                })),
-            },
+            metadata: suppliers.rows.map((supplier) => ({
+                id: supplier.id,
+                name: supplier.supplier_name,
+                description: supplier.supplier_description,
+                address: supplier.supplier_address,
+                phone: supplier.supplier_phone,
+                email: supplier.supplier_email,
+            })),
             meta: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),

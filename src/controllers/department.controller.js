@@ -7,21 +7,21 @@ class DepartmentController {
     createDepartment = async (req, res, next) => {
         new CREATED({
             message: 'Create department successfully',
-            data: await DepartmentService.createDepartment(req.body),
+            metadata: await DepartmentService.createDepartment(req.body),
         }).send(res);
     };
 
     updateDepartment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Update department successfully',
-            data: await DepartmentService.updateDepartment(req.body),
+            metadata: await DepartmentService.updateDepartment(req.body),
         }).send(res);
     };
 
     deleteDepartment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Delete department successfully',
-            data: await DepartmentService.deleteDepartment(
+            metadata: await DepartmentService.deleteDepartment(
                 req.params.departmentId,
             ),
         }).send(res);
@@ -30,14 +30,14 @@ class DepartmentController {
     getAllDepartments = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all departments successfully',
-            data: await DepartmentService.getAllDepartments(req.query),
+            metadata: await DepartmentService.getAllDepartments(req.query),
         }).send(res);
     };
 
     getDepartmentById = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get department by ID successfully',
-            data: await DepartmentService.getDepartmentById(
+            metadata: await DepartmentService.getDepartmentById(
                 req.params.departmentId,
             ),
         }).send(res);

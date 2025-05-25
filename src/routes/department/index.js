@@ -21,9 +21,9 @@ const router = express.Router();
  *     Department:
  *       type: object
  *       properties:
- *         departmentId:
+ *         id:
  *           type: string
- *         departmentName:
+ *         name:
  *           type: string
  *         notes:
  *           type: string
@@ -38,23 +38,23 @@ const router = express.Router();
  *     CreateDepartmentInput:
  *       type: object
  *       required:
- *         - departmentId
- *         - departmentName
+ *         - id
+ *         - name
  *       properties:
- *         departmentId:
+ *         id:
  *           type: string
- *         departmentName:
+ *         name:
  *           type: string
  *         notes:
  *           type: string
  *     UpdateDepartmentInput:
  *       type: object
  *       required:
- *         - departmentId
+ *         - id
  *       properties:
- *         departmentId:
+ *         id:
  *           type: string
- *         departmentName:
+ *         name:
  *           type: string
  *         notes:
  *           type: string
@@ -69,6 +69,9 @@ const router = express.Router();
  *     summary: Create a new department
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Department]
  *     requestBody:
  *       required: true
@@ -92,6 +95,9 @@ const router = express.Router();
  *     summary: Update a department
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Department]
  *     requestBody:
  *       required: true
@@ -115,13 +121,15 @@ const router = express.Router();
  *     summary: Delete (deactivate) a department
  *     security:
  *       - BearerAuth: []
- *     tags: [Department]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: departmentId
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Department]
  *     responses:
  *       200:
  *         description: Department deleted successfully
@@ -134,8 +142,9 @@ const router = express.Router();
  *     summary: Get all departments
  *     security:
  *       - BearerAuth: []
- *     tags: [Department]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -144,6 +153,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Department]
  *     responses:
  *       200:
  *         description: List of departments
@@ -176,13 +186,15 @@ const router = express.Router();
  *     summary: Get department by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [Department]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: departmentId
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Department]
  *     responses:
  *       200:
  *         description: Department details

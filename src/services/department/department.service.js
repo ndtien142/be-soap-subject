@@ -4,28 +4,30 @@ const { BadRequestError } = require('../../core/error.response');
 const database = require('../../models');
 
 class DepartmentService {
-    static async createDepartment({ departmentId, departmentName, notes }) {
+    static async createDepartment({ id, name, notes }) {
         // Check if department already exists
         const existing = await database.Department.findOne({
-            where: { department_id: departmentId },
+            where: { department_id: id },
         });
         if (existing) {
             throw new BadRequestError('Department ID already exists');
         }
 
         const department = await database.Department.create({
-            department_id: departmentId,
-            department_name: departmentName,
+            department_id: id,
+            department_name: name,
             notes,
             status: true,
         });
 
+        console.log('Department created:', department);
+
         return {
             code: 200,
             message: 'Department created successfully',
-            data: {
-                departmentId: department.department_id,
-                departmentName: department.department_name,
+            metadata: {
+                id: department.department_id,
+                name: department.department_name,
                 notes: department.notes,
                 status: department.status,
                 createdAt: department.create_time,
@@ -34,20 +36,15 @@ class DepartmentService {
         };
     }
 
-    static async updateDepartment({
-        departmentId,
-        departmentName,
-        notes,
-        status,
-    }) {
+    static async updateDepartment({ id, name, notes, status }) {
         const department = await database.Department.findOne({
-            where: { department_id: departmentId },
+            where: { department_id: id },
         });
         if (!department) {
             throw new BadRequestError('Department not found');
         }
 
-        if (departmentName) department.department_name = departmentName;
+        if (name) department.department_name = name;
         if (notes !== undefined) department.notes = notes;
         if (status !== undefined) department.status = status;
 
@@ -56,9 +53,9 @@ class DepartmentService {
         return {
             code: 200,
             message: 'Department updated successfully',
-            data: {
-                departmentId: department.department_id,
-                departmentName: department.department_name,
+            metadata: {
+                id: department.department_id,
+                name: department.department_name,
                 notes: department.notes,
                 status: department.status,
                 createdAt: department.create_time,
@@ -67,9 +64,9 @@ class DepartmentService {
         };
     }
 
-    static async deleteDepartment(departmentId) {
+    static async deleteDepartment(id) {
         const department = await database.Department.findOne({
-            where: { department_id: departmentId },
+            where: { department_id: id },
         });
         if (!department) {
             throw new BadRequestError('Department not found');
@@ -96,8 +93,8 @@ class DepartmentService {
             code: 200,
             message: 'Get all departments successfully',
             metadata: result.rows.map((d) => ({
-                departmentId: d.department_id,
-                departmentName: d.department_name,
+                id: d.department_id,
+                name: d.department_name,
                 notes: d.notes,
                 status: d.status,
                 createdAt: d.create_time,
@@ -112,9 +109,9 @@ class DepartmentService {
         };
     }
 
-    static async getDepartmentById(departmentId) {
+    static async getDepartmentById(id) {
         const department = await database.Department.findOne({
-            where: { department_id: departmentId },
+            where: { department_id: id },
         });
         if (!department) {
             throw new BadRequestError('Department not found');
@@ -123,9 +120,9 @@ class DepartmentService {
         return {
             code: 200,
             message: 'Get department by ID successfully',
-            data: {
-                departmentId: department.department_id,
-                departmentName: department.department_name,
+            metadata: {
+                id: department.department_id,
+                name: department.department_name,
                 notes: department.notes,
                 status: department.status,
                 createdAt: department.create_time,
