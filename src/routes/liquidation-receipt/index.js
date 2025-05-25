@@ -77,6 +77,9 @@ const router = express.Router();
  *     summary: Create a new liquidation receipt
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [LiquidationReceipt]
  *     requestBody:
  *       required: true
@@ -100,13 +103,15 @@ const router = express.Router();
  *     summary: Approve a liquidation receipt
  *     security:
  *       - BearerAuth: []
- *     tags: [LiquidationReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [LiquidationReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -128,13 +133,15 @@ const router = express.Router();
  *     summary: Reject a liquidation receipt
  *     security:
  *       - BearerAuth: []
- *     tags: [LiquidationReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [LiquidationReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -158,8 +165,9 @@ const router = express.Router();
  *     summary: Get all liquidation receipts
  *     security:
  *       - BearerAuth: []
- *     tags: [LiquidationReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -168,6 +176,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [LiquidationReceipt]
  *     responses:
  *       200:
  *         description: List of liquidation receipts
@@ -200,13 +209,15 @@ const router = express.Router();
  *     summary: Get liquidation receipt details by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [LiquidationReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [LiquidationReceipt]
  *     responses:
  *       200:
  *         description: Liquidation receipt details

@@ -87,6 +87,9 @@ const router = express.Router();
  *     summary: Create a new transfer receipt
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [TransferReceipt]
  *     requestBody:
  *       required: true
@@ -110,13 +113,15 @@ const router = express.Router();
  *     summary: Approve a transfer receipt
  *     security:
  *       - BearerAuth: []
- *     tags: [TransferReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [TransferReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -138,13 +143,15 @@ const router = express.Router();
  *     summary: Reject a transfer receipt
  *     security:
  *       - BearerAuth: []
- *     tags: [TransferReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [TransferReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -168,13 +175,15 @@ const router = express.Router();
  *     summary: Mark a transfer receipt as transferred and update equipment room
  *     security:
  *       - BearerAuth: []
- *     tags: [TransferReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [TransferReceipt]
  *     responses:
  *       200:
  *         description: Transfer receipt marked as transferred
@@ -187,8 +196,9 @@ const router = express.Router();
  *     summary: Get all transfer receipts
  *     security:
  *       - BearerAuth: []
- *     tags: [TransferReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -197,6 +207,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [TransferReceipt]
  *     responses:
  *       200:
  *         description: List of transfer receipts
@@ -229,13 +240,15 @@ const router = express.Router();
  *     summary: Get transfer receipt details by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [TransferReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [TransferReceipt]
  *     responses:
  *       200:
  *         description: Transfer receipt details

@@ -54,6 +54,9 @@ const router = express.Router();
  *     summary: Create a new equipment
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Equipment]
  *     requestBody:
  *       required: true
@@ -77,13 +80,15 @@ const router = express.Router();
  *     summary: Update an equipment
  *     security:
  *       - BearerAuth: []
- *     tags: [Equipment]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: serialNumber
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Equipment]
  *     requestBody:
  *       required: true
  *       content:
@@ -106,13 +111,15 @@ const router = express.Router();
  *     summary: Delete (soft) an equipment
  *     security:
  *       - BearerAuth: []
- *     tags: [Equipment]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: serialNumber
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: Equipment deleted successfully
@@ -125,13 +132,15 @@ const router = express.Router();
  *     summary: Get equipment by serial number
  *     security:
  *       - BearerAuth: []
- *     tags: [Equipment]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: serialNumber
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: Equipment retrieved successfully
@@ -148,8 +157,9 @@ const router = express.Router();
  *     summary: Get all equipment
  *     security:
  *       - BearerAuth: []
- *     tags: [Equipment]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -158,6 +168,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Equipment]
  *     responses:
  *       200:
  *         description: List of equipment retrieved successfully

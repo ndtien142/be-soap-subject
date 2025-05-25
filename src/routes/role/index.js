@@ -81,6 +81,9 @@ const router = express.Router();
  *     summary: Create a new role
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -104,6 +107,9 @@ const router = express.Router();
  *     summary: Update a role
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -127,13 +133,15 @@ const router = express.Router();
  *     summary: Delete a role
  *     security:
  *       - BearerAuth: []
- *     tags: [Role]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [Role]
  *     responses:
  *       200:
  *         description: Role deleted successfully
@@ -146,8 +154,9 @@ const router = express.Router();
  *     summary: Get all roles
  *     security:
  *       - BearerAuth: []
- *     tags: [Role]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -156,6 +165,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Role]
  *     responses:
  *       200:
  *         description: List of roles
@@ -188,13 +198,15 @@ const router = express.Router();
  *     summary: Get role by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [Role]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [Role]
  *     responses:
  *       200:
  *         description: Role details

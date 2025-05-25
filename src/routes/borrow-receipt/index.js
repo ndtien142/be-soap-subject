@@ -88,6 +88,9 @@ const router = express.Router();
  *     summary: Create a new borrow receipt
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [BorrowReceipt]
  *     requestBody:
  *       required: true
@@ -111,13 +114,15 @@ const router = express.Router();
  *     summary: Approve a borrow receipt
  *     security:
  *       - BearerAuth: []
- *     tags: [BorrowReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [BorrowReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -139,13 +144,15 @@ const router = express.Router();
  *     summary: Reject a borrow receipt
  *     security:
  *       - BearerAuth: []
- *     tags: [BorrowReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [BorrowReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -169,13 +176,15 @@ const router = express.Router();
  *     summary: Mark a borrow receipt as borrowed and update equipment room
  *     security:
  *       - BearerAuth: []
- *     tags: [BorrowReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [BorrowReceipt]
  *     responses:
  *       200:
  *         description: Borrow receipt marked as borrowed
@@ -188,13 +197,15 @@ const router = express.Router();
  *     summary: Mark a borrow receipt as returned and update equipment status
  *     security:
  *       - BearerAuth: []
- *     tags: [BorrowReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [BorrowReceipt]
  *     responses:
  *       200:
  *         description: Borrow receipt marked as returned
@@ -207,8 +218,9 @@ const router = express.Router();
  *     summary: Get all borrow receipts
  *     security:
  *       - BearerAuth: []
- *     tags: [BorrowReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -217,6 +229,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [BorrowReceipt]
  *     responses:
  *       200:
  *         description: List of borrow receipts
@@ -249,13 +262,15 @@ const router = express.Router();
  *     summary: Get borrow receipt details by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [BorrowReceipt]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [BorrowReceipt]
  *     responses:
  *       200:
  *         description: Borrow receipt details

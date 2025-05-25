@@ -64,6 +64,9 @@ const router = express.Router();
  *     summary: Create a new permission
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Permission]
  *     requestBody:
  *       required: true
@@ -87,6 +90,9 @@ const router = express.Router();
  *     summary: Update a permission
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Permission]
  *     requestBody:
  *       required: true
@@ -110,13 +116,15 @@ const router = express.Router();
  *     summary: Delete a permission
  *     security:
  *       - BearerAuth: []
- *     tags: [Permission]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [Permission]
  *     responses:
  *       200:
  *         description: Permission deleted successfully
@@ -129,8 +137,9 @@ const router = express.Router();
  *     summary: Get all permissions
  *     security:
  *       - BearerAuth: []
- *     tags: [Permission]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -139,6 +148,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Permission]
  *     responses:
  *       200:
  *         description: List of permissions
@@ -171,13 +181,15 @@ const router = express.Router();
  *     summary: Get permission by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [Permission]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [Permission]
  *     responses:
  *       200:
  *         description: Permission details

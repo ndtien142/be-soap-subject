@@ -76,6 +76,9 @@ const router = express.Router();
  *     summary: Create a new room
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Room]
  *     requestBody:
  *       required: true
@@ -99,6 +102,9 @@ const router = express.Router();
  *     summary: Update a room
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Room]
  *     requestBody:
  *       required: true
@@ -122,13 +128,15 @@ const router = express.Router();
  *     summary: Delete (deactivate) a room
  *     security:
  *       - BearerAuth: []
- *     tags: [Room]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: roomId
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Room]
  *     responses:
  *       200:
  *         description: Room deleted successfully
@@ -141,8 +149,9 @@ const router = express.Router();
  *     summary: Get all rooms
  *     security:
  *       - BearerAuth: []
- *     tags: [Room]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -151,6 +160,7 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Room]
  *     responses:
  *       200:
  *         description: List of rooms
@@ -183,13 +193,15 @@ const router = express.Router();
  *     summary: Get room by ID
  *     security:
  *       - BearerAuth: []
- *     tags: [Room]
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: roomId
  *         required: true
  *         schema:
  *           type: string
+ *     tags: [Room]
  *     responses:
  *       200:
  *         description: Room details
