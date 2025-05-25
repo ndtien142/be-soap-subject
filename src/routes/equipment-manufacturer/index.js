@@ -25,6 +25,9 @@ const router = express.Router();
  *           type: integer
  *         name:
  *           type: string
+ *         prefix:
+ *           type: string
+ *           description: Prefix for the manufacturer
  *         contactInfo:
  *           type: string
  *         address:
@@ -39,20 +42,33 @@ const router = express.Router();
  *           format: date-time
  *     CreateManufacturerInput:
  *       type: object
+ *       required:
+ *         - name
+ *         - prefix
  *       properties:
  *         name:
  *           type: string
+ *         prefix:
+ *           type: string
+ *           description: Prefix for the manufacturer
  *         contactInfo:
  *           type: string
  *         address:
  *           type: string
  *     UpdateManufacturerInput:
  *       type: object
+ *       required:
+ *         - id
+ *         - name
+ *         - prefix
  *       properties:
  *         id:
  *           type: integer
  *         name:
  *           type: string
+ *         prefix:
+ *           type: string
+ *           description: Prefix for the manufacturer
  *         contactInfo:
  *           type: string
  *         address:

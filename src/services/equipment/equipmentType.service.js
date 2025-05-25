@@ -5,7 +5,7 @@ const { BadRequestError } = require('../../core/error.response');
 const { EquipmentType } = db;
 
 class EquipmentTypeService {
-    static createNewEquipmentType = async ({ name, description }) => {
+    static createNewEquipmentType = async ({ name, description, prefix }) => {
         // Check if the equipment type name already exists
         const existingEquipmentTypeName = await EquipmentType.findOne({
             where: { equipment_type_name: name },
@@ -14,9 +14,18 @@ class EquipmentTypeService {
             throw new BadRequestError('Equipment type name already exists');
         }
 
+        // Check if prefix already exists
+        const existingPrefix = await EquipmentType.findOne({
+            where: { prefix },
+        });
+        if (existingPrefix) {
+            throw new BadRequestError('Equipment type prefix already exists');
+        }
+
         const newEquipmentType = await EquipmentType.create({
             equipment_type_name: name,
             equipment_type_description: description,
+            prefix: prefix,
             is_active: true,
             is_deleted: false,
         });
@@ -27,6 +36,7 @@ class EquipmentTypeService {
                 id: newEquipmentType.id,
                 name: newEquipmentType.equipment_type_name,
                 description: newEquipmentType.equipment_type_description,
+                prefix: newEquipmentType.prefix,
                 isActive: newEquipmentType.is_active,
                 isDeleted: newEquipmentType.is_deleted,
                 createdAt: newEquipmentType.createdAt,
@@ -88,7 +98,7 @@ class EquipmentTypeService {
             },
         };
     };
-    static updateEquipmentType = async ({ id, name, description }) => {
+    static updateEquipmentType = async ({ id, name, description, prefix }) => {
         const equipmentType = await EquipmentType.findOne({
             where: { id: id, is_deleted: false },
         });
@@ -106,6 +116,22 @@ class EquipmentTypeService {
             throw new BadRequestError('Equipment type name already exists');
         }
 
+        // Check if prefix already exists for another equipment type
+        if (prefix) {
+            const existingPrefix = await EquipmentType.findOne({
+                where: {
+                    prefix,
+                    id: { [Op.ne]: id },
+                },
+            });
+            if (existingPrefix) {
+                throw new BadRequestError(
+                    'Equipment type prefix already exists',
+                );
+            }
+            equipmentType.prefix = prefix;
+        }
+
         equipmentType.equipment_type_name = name;
         equipmentType.equipment_type_description = description;
         await equipmentType.save();
@@ -116,6 +142,7 @@ class EquipmentTypeService {
                 id: equipmentType.id,
                 name: equipmentType.equipment_type_name,
                 description: equipmentType.equipment_type_description,
+                prefix: equipmentType.prefix,
                 isActive: equipmentType.is_active,
                 isDeleted: equipmentType.is_deleted,
                 createdAt: equipmentType.createdAt,

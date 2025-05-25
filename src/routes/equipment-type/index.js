@@ -29,6 +29,9 @@ const router = express.Router();
  *         description:
  *           type: string
  *           description: Description of the equipment type
+ *         prefix:
+ *           type: string
+ *           description: Prefix for the equipment type
  *         isActive:
  *           type: boolean
  *         isDeleted:
@@ -60,11 +63,15 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - name
+ *               - prefix
  *             properties:
  *               name:
  *                 type: string
  *               description:
  *                 type: string
+ *               prefix:
+ *                 type: string
+ *                 description: Prefix for the equipment type
  *     responses:
  *       200:
  *         description: Equipment type created successfully
@@ -168,6 +175,7 @@ const router = express.Router();
  *             required:
  *               - id
  *               - name
+ *               - prefix
  *             properties:
  *               id:
  *                 type: integer
@@ -175,6 +183,9 @@ const router = express.Router();
  *                 type: string
  *               description:
  *                 type: string
+ *               prefix:
+ *                 type: string
+ *                 description: Prefix for the equipment type
  *     responses:
  *       200:
  *         description: Equipment type updated

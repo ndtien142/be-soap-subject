@@ -11,19 +11,7 @@ class GroupEquipmentService {
         unitOfMeasure,
         manufacturer,
     }) => {
-        const groupEquipmentCode =
-            GroupEquipmentService.generateGroupEquipmentCode(type);
-
-        const unitOfMeasureData = await database.UnitOfMeasure.findOne({
-            where: {
-                unit_of_measure_name: unitOfMeasure.name,
-                id: unitOfMeasure.id,
-            },
-        });
-        if (!unitOfMeasureData) {
-            throw new BadRequestError('Unit of measure not found');
-        }
-
+        // Fetch manufacturer and type for prefix
         const equipmentTypeData = await database.EquipmentType.findOne({
             where: { equipment_type_name: type.name, id: type.id },
         });
@@ -39,6 +27,22 @@ class GroupEquipmentService {
         });
         if (!manufacturerData) {
             throw new BadRequestError('Manufacturer not found');
+        }
+
+        const groupEquipmentCode =
+            GroupEquipmentService.generateGroupEquipmentCode(
+                equipmentTypeData.prefix,
+                manufacturerData.prefix,
+            );
+
+        const unitOfMeasureData = await database.UnitOfMeasure.findOne({
+            where: {
+                unit_of_measure_name: unitOfMeasure.name,
+                id: unitOfMeasure.id,
+            },
+        });
+        if (!unitOfMeasureData) {
+            throw new BadRequestError('Unit of measure not found');
         }
 
         const existingGroupEquipmentName =
@@ -86,10 +90,10 @@ class GroupEquipmentService {
         };
     };
 
-    static generateGroupEquipmentCode = (typeEquipment) => {
-        const prefix = typeEquipment.name.trim().slice(0, 3).toUpperCase();
-        const timestamp = Date.now();
-        return `${prefix}-${timestamp}`;
+    static generateGroupEquipmentCode = (typePrefix, manufacturerPrefix) => {
+        // Use both type and manufacturer prefix, and only the current year as timestamp
+        const year = new Date().getFullYear();
+        return `${typePrefix}-${manufacturerPrefix}-${year}`;
     };
 
     static updateGroupEquipment = async ({

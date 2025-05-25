@@ -188,6 +188,8 @@ class ImportReceiptService {
                             attributes: [
                                 'group_equipment_code',
                                 'group_equipment_name',
+                                'equipment_type_id',
+                                'equipment_manufacturer_id',
                             ],
                         },
                     ],
@@ -205,23 +207,38 @@ class ImportReceiptService {
             );
         }
 
-        // Create detail equipment entries for each item
-        const createdDetails = [];
+        // Create equipment entries for each item in the detail import receipt
+        const createdEquipments = [];
         for (const detail of importReceipt.DetailImportReceipts) {
-            const { group_equipment_code, quantity } = detail;
+            const { group_equipment_code, quantity, GroupEquipment } = detail;
+
+            // Fetch type and manufacturer prefix for serial number
+            const type = await database.EquipmentType.findOne({
+                where: { id: GroupEquipment.equipment_type_id },
+            });
+            const manufacturer = await database.EquipmentManufacturer.findOne({
+                where: { id: GroupEquipment.equipment_manufacturer_id },
+            });
+
+            const typePrefix = type ? type.prefix : 'TYP';
+            const manufacturerPrefix = manufacturer
+                ? manufacturer.prefix
+                : 'MAN';
+            const year = new Date().getFullYear();
 
             for (let i = 0; i < quantity; i++) {
-                const serialNumber = `${group_equipment_code}-${Date.now()}-${i}`;
-                const newDetail = await database.Equipment.create({
+                const serialNumber = `${typePrefix}-${manufacturerPrefix}-${group_equipment_code}-${year}-${importReceiptId}-${i + 1}`;
+                const equipment = await database.Equipment.create({
                     serial_number: serialNumber,
                     group_equipment_code,
-                    status: DETAIL_EQUIPMENT_STATUS.available,
+                    status: 'available',
                     import_receipt_id: importReceiptId,
                     equipment_description: null,
                     equipment_location: null,
                     day_of_first_use: null,
+                    room_id: null,
                 });
-                createdDetails.push(newDetail);
+                createdEquipments.push(equipment);
             }
         }
 
@@ -232,7 +249,7 @@ class ImportReceiptService {
         return {
             code: 200,
             message:
-                'Import receipt processed successfully, and detail equipment created',
+                'Import receipt processed successfully, and equipment created',
             data: {
                 id: importReceipt.id,
                 dateOfOrder: importReceipt.date_of_order,
@@ -260,12 +277,10 @@ class ImportReceiptService {
                     price: detail.price,
                     quantity: detail.quantity,
                 })),
-                createdDetails: createdDetails.map((detail) => ({
-                    serialNumber: detail.serial_number,
-                    groupEquipmentCode: detail.group_equipment_code,
-                    status: detail.status,
-                    location: detail.equipment_location,
-                    description: detail.equipment_description,
+                createdEquipments: createdEquipments.map((eq) => ({
+                    serialNumber: eq.serial_number,
+                    groupEquipmentCode: eq.group_equipment_code,
+                    status: eq.status,
                 })),
                 updatedAt: importReceipt.updatedAt,
             },

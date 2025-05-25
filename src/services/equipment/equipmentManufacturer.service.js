@@ -4,7 +4,12 @@ const { BadRequestError } = require('../../core/error.response');
 const database = require('../../models');
 
 class EquipmentManufacturerService {
-    static createManufacturer = async ({ name, contactInfo, address }) => {
+    static createManufacturer = async ({
+        name,
+        contactInfo,
+        address,
+        prefix,
+    }) => {
         // Check if the manufacturer name already exists
         const existingManufacturer =
             await database.EquipmentManufacturer.findOne({
@@ -14,10 +19,19 @@ class EquipmentManufacturerService {
             throw new BadRequestError('Manufacturer name already exists');
         }
 
+        // Check if prefix already exists
+        const existingPrefix = await database.EquipmentManufacturer.findOne({
+            where: { prefix },
+        });
+        if (existingPrefix) {
+            throw new BadRequestError('Manufacturer prefix already exists');
+        }
+
         const newManufacturer = await database.EquipmentManufacturer.create({
             manufacturer_name: name,
             contact_info: contactInfo,
             address: address,
+            prefix: prefix,
             is_active: true,
         });
 
@@ -27,6 +41,7 @@ class EquipmentManufacturerService {
             metadata: {
                 id: newManufacturer.id,
                 name: newManufacturer.manufacturer_name,
+                prefix: newManufacturer.prefix,
                 contactInfo: newManufacturer.contact_info,
                 address: newManufacturer.address,
                 isActive: newManufacturer.is_active,
@@ -36,7 +51,13 @@ class EquipmentManufacturerService {
         };
     };
 
-    static updateManufacturer = async ({ id, name, contactInfo, address }) => {
+    static updateManufacturer = async ({
+        id,
+        name,
+        contactInfo,
+        address,
+        prefix,
+    }) => {
         // Check if the manufacturer exists
         const manufacturer = await database.EquipmentManufacturer.findByPk(id);
         if (!manufacturer) {
@@ -48,19 +69,27 @@ class EquipmentManufacturerService {
             await database.EquipmentManufacturer.findOne({
                 where: { manufacturer_name: name },
             });
-        console.log(
-            existingManufacturer.id,
-            ' ',
-            'typeof',
-            typeof existingManufacturer.id,
-            'typeof id',
-            typeof id,
-        );
         if (
             existingManufacturer &&
             parseInt(existingManufacturer.id) !== parseInt(id)
         ) {
             throw new BadRequestError('Manufacturer name already exists');
+        }
+
+        // Check if prefix already exists for another manufacturer
+        if (prefix) {
+            const existingPrefix = await database.EquipmentManufacturer.findOne(
+                {
+                    where: { prefix },
+                },
+            );
+            if (
+                existingPrefix &&
+                parseInt(existingPrefix.id) !== parseInt(id)
+            ) {
+                throw new BadRequestError('Manufacturer prefix already exists');
+            }
+            manufacturer.prefix = prefix;
         }
 
         manufacturer.manufacturer_name = name;
@@ -74,6 +103,7 @@ class EquipmentManufacturerService {
             metadata: {
                 id: manufacturer.id,
                 name: manufacturer.manufacturer_name,
+                prefix: manufacturer.prefix,
                 contactInfo: manufacturer.contact_info,
                 address: manufacturer.address,
                 isActive: manufacturer.is_active,
