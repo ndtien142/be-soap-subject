@@ -37,7 +37,7 @@ const router = express.Router();
  *           type: string
  *         status:
  *           type: string
- *           enum: [pending, approved, rejected, processed]
+ *           enum: [requested, approved, rejected, processed]
  */
 
 /**

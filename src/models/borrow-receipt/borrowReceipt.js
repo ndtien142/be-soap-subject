@@ -10,22 +10,15 @@ function model(sequelize) {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
+            allowNull: false,
         },
-        transfer_date: {
+        borrow_date: {
             type: DataTypes.DATE,
             allowNull: false,
         },
-        transfer_from: {
-            type: DataTypes.STRING(50),
-            allowNull: false,
-        },
-        transfer_to: {
-            type: DataTypes.STRING(50),
-            allowNull: false,
-        },
-        department_id: {
-            type: DataTypes.STRING(20),
-            allowNull: false,
+        return_date: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
         user_code: {
             type: DataTypes.STRING(20),
@@ -40,30 +33,31 @@ function model(sequelize) {
                 'requested',
                 'approved',
                 'rejected',
-                'transferred',
+                'returned',
+                'borrowed',
             ),
             allowNull: false,
             defaultValue: 'requested',
         },
-        notes: {
-            type: DataTypes.TEXT,
+        note: {
+            type: DataTypes.STRING(1000),
             allowNull: true,
         },
     };
 
     const options = {
-        tableName: 'tb_transfer_receipt',
+        tableName: 'tb_borrow_receipt',
         freezeTableName: true,
         timestamps: true,
         createdAt: 'create_time',
         updatedAt: 'update_time',
     };
 
-    const TransferReceipt = sequelize.define(
-        'TransferReceipt',
+    const BorrowReceipt = sequelize.define(
+        'BorrowReceipt',
         attributes,
         options,
     );
 
-    return TransferReceipt;
+    return BorrowReceipt;
 }

@@ -38,6 +38,10 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 'available',
         },
+        room_id: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
         import_receipt_id: {
             type: DataTypes.INTEGER,
             allowNull: true,

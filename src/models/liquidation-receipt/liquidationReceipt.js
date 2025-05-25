@@ -21,17 +21,21 @@ function model(sequelize) {
         },
         status: {
             type: DataTypes.ENUM(
-                'proposed',
+                'requested',
                 'approved',
                 'rejected',
-                'completed',
+                'liquidated',
             ),
-            defaultValue: 'proposed',
+            defaultValue: 'requested',
             allowNull: false,
         },
         user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
+        },
+        approve_by: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
         },
         notes: {
             type: DataTypes.TEXT,
