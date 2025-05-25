@@ -34,6 +34,8 @@ function model(sequelize) {
                 'under_maintenance',
                 'out_of_service',
                 'liquidation',
+                'reserved',
+                'pending_transfer',
             ),
             allowNull: false,
             defaultValue: 'available',

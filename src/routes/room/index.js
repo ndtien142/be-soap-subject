@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const equipmentManufacturerController = require('../../controllers/equipmentManufacturer.controller');
+const roomController = require('../../controllers/room.controller');
 const { asyncHandler } = require('../../helpers/asyncHandler');
 const { authenticationV2 } = require('../../auth/authUtils');
 
@@ -10,29 +10,26 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: EquipmentManufacturer
- *   description: Equipment Manufacturer management APIs
+ *   name: Room
+ *   description: Room management APIs
  */
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     EquipmentManufacturer:
+ *     Room:
  *       type: object
  *       properties:
- *         id:
- *           type: integer
- *         name:
+ *         roomId:
  *           type: string
- *         prefix:
+ *         roomName:
  *           type: string
- *           description: Prefix for the manufacturer
- *         contactInfo:
+ *         departmentId:
  *           type: string
- *         address:
+ *         notes:
  *           type: string
- *         isActive:
+ *         status:
  *           type: boolean
  *         createdAt:
  *           type: string
@@ -40,125 +37,116 @@ const router = express.Router();
  *         updatedAt:
  *           type: string
  *           format: date-time
- *     CreateManufacturerInput:
+ *     CreateRoomInput:
  *       type: object
  *       required:
- *         - name
- *         - prefix
+ *         - roomId
+ *         - roomName
+ *         - departmentId
  *       properties:
- *         name:
+ *         roomId:
  *           type: string
- *         prefix:
+ *         roomName:
  *           type: string
- *           description: Prefix for the manufacturer
- *         contactInfo:
+ *         departmentId:
  *           type: string
- *         address:
+ *         notes:
  *           type: string
- *     UpdateManufacturerInput:
+ *     UpdateRoomInput:
  *       type: object
  *       required:
- *         - id
- *         - name
- *         - prefix
+ *         - roomId
  *       properties:
- *         id:
- *           type: integer
- *         name:
+ *         roomId:
  *           type: string
- *         prefix:
+ *         roomName:
  *           type: string
- *           description: Prefix for the manufacturer
- *         contactInfo:
+ *         departmentId:
  *           type: string
- *         address:
+ *         notes:
  *           type: string
+ *         status:
+ *           type: boolean
  */
 
 /**
  * @swagger
- * /equipment-manufacturer:
+ * /room:
  *   post:
- *     summary: Create a new manufacturer
+ *     summary: Create a new room
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *     tags: [EquipmentManufacturer]
+ *     tags: [Room]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateManufacturerInput'
+ *             $ref: '#/components/schemas/CreateRoomInput'
  *     responses:
  *       200:
- *         description: Manufacturer created successfully
+ *         description: Room created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/EquipmentManufacturer'
+ *               $ref: '#/components/schemas/Room'
  */
 
 /**
  * @swagger
- * /equipment-manufacturer:
+ * /room:
  *   put:
- *     summary: Update an existing manufacturer
- *     tags: [EquipmentManufacturer]
+ *     summary: Update a room
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
+ *     tags: [Room]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateManufacturerInput'
+ *             $ref: '#/components/schemas/UpdateRoomInput'
  *     responses:
  *       200:
- *         description: Manufacturer updated successfully
+ *         description: Room updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/EquipmentManufacturer'
+ *               $ref: '#/components/schemas/Room'
  */
 
 /**
  * @swagger
- * /equipment-manufacturer/{id}:
+ * /room/{roomId}:
  *   delete:
- *     summary: Delete a manufacturer
- *     tags: [EquipmentManufacturer]
+ *     summary: Delete (deactivate) a room
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
- *         name: id
+ *         name: roomId
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *     tags: [Room]
  *     responses:
  *       200:
- *         description: Manufacturer deleted successfully
+ *         description: Room deleted successfully
  */
 
 /**
  * @swagger
- * /equipment-manufacturer:
+ * /room:
  *   get:
- *     summary: Get all manufacturers
- *     tags: [EquipmentManufacturer]
+ *     summary: Get all rooms
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -172,63 +160,63 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Room]
  *     responses:
  *       200:
- *         description: List of manufacturers retrieved successfully
+ *         description: List of rooms
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/EquipmentManufacturer'
+ *               type: object
+ *               properties:
+ *                 metadata:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Room'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     itemPerPage:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
  */
 
 /**
  * @swagger
- * /equipment-manufacturer/{id}:
+ * /room/{roomId}:
  *   get:
- *     summary: Get manufacturer by ID
- *     tags: [EquipmentManufacturer]
+ *     summary: Get room by ID
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
- *         name: id
+ *         name: roomId
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *     tags: [Room]
  *     responses:
  *       200:
- *         description: Manufacturer retrieved successfully
+ *         description: Room details
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/EquipmentManufacturer'
+ *               $ref: '#/components/schemas/Room'
  */
 
 router.use(authenticationV2);
 
-router.post(
-    '',
-    asyncHandler(equipmentManufacturerController.createManufacturer),
-);
-router.put(
-    '/:id',
-    asyncHandler(equipmentManufacturerController.updateManufacturer),
-);
-router.delete(
-    '/:id',
-    asyncHandler(equipmentManufacturerController.deleteManufacturer),
-);
-router.get(
-    '',
-    asyncHandler(equipmentManufacturerController.getAllManufacturers),
-);
-router.get(
-    '/:id',
-    asyncHandler(equipmentManufacturerController.getManufacturerById),
-);
+router.post('', asyncHandler(roomController.createRoom));
+router.put('', asyncHandler(roomController.updateRoom));
+router.delete('/:roomId', asyncHandler(roomController.deleteRoom));
+router.get('', asyncHandler(roomController.getAllRooms));
+router.get('/:roomId', asyncHandler(roomController.getRoomById));
 
 module.exports = router;

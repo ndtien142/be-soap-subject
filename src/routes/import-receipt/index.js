@@ -10,7 +10,7 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   - name: Import Receipts
+ *   - name: ImportReceipt
  *     description: API for managing import receipts
  */
 
@@ -18,26 +18,54 @@ const router = express.Router();
  * @swagger
  * components:
  *   schemas:
+ *     ImportReceiptItem:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: string
+ *           description: Group equipment code
+ *         price:
+ *           type: number
+ *           format: float
+ *         quantity:
+ *           type: integer
+ *     ImportReceiptSupplier:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: Supplier ID
  *     ImportReceipt:
  *       type: object
  *       properties:
  *         id:
  *           type: integer
- *         code:
- *           type: string
- *         supplierId:
- *           type: integer
+ *         supplier:
+ *           $ref: '#/components/schemas/ImportReceiptSupplier'
  *         dateOfReceived:
  *           type: string
  *           format: date
  *         dateOfOrder:
  *           type: string
  *           format: date
+ *         dateOfActualReceived:
+ *           type: string
+ *           format: date
  *         note:
  *           type: string
  *         status:
  *           type: string
- *           enum: [requested, approved, rejected, processed]
+ *           enum: [requested, approved, rejected, completed]
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ImportReceiptItem'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  */
 
 /**
@@ -62,7 +90,7 @@ const router = express.Router();
  *           type: integer
  *           default: 20
  *         description: Number of items per page
- *     tags: [Import Receipts]
+ *     tags: [ImportReceipt]
  *     responses:
  *       200:
  *         description: List of import receipts
@@ -76,18 +104,20 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *                 metadata:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ImportReceipt'
+ *                 meta:
  *                   type: object
  *                   properties:
- *                     totalCount:
+ *                     currentPage:
+ *                       type: integer
+ *                     itemPerPage:
+ *                       type: integer
+ *                     totalItems:
  *                       type: integer
  *                     totalPages:
  *                       type: integer
- *                     currentPage:
- *                       type: integer
- *                     receipts:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/ImportReceipt'
  */
 
 /**
@@ -100,7 +130,7 @@ const router = express.Router();
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *     tags: [Import Receipts]
+ *     tags: [ImportReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -112,26 +142,13 @@ const router = express.Router();
  *               - items
  *               - dateOfReceived
  *               - dateOfOrder
- *               - user
  *             properties:
  *               supplier:
- *                 type: object
- *                 required: [id]
- *                 properties:
- *                   id:
- *                     type: integer
+ *                 $ref: '#/components/schemas/ImportReceiptSupplier'
  *               items:
  *                 type: array
  *                 items:
- *                   type: object
- *                   required: [code, price, quantity]
- *                   properties:
- *                     code:
- *                       type: string
- *                     price:
- *                       type: number
- *                     quantity:
- *                       type: integer
+ *                   $ref: '#/components/schemas/ImportReceiptItem'
  *               dateOfReceived:
  *                 type: string
  *                 format: date
@@ -140,15 +157,13 @@ const router = express.Router();
  *                 format: date
  *               note:
  *                 type: string
- *               user:
- *                 type: object
- *                 required: [code]
- *                 properties:
- *                   code:
- *                     type: string
  *     responses:
- *       201:
+ *       200:
  *         description: Import receipt created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ImportReceipt'
  *       400:
  *         description: Invalid input
  */
@@ -169,7 +184,7 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *         description: Import receipt ID
- *     tags: [Import Receipts]
+ *     tags: [ImportReceipt]
  *     responses:
  *       200:
  *         description: Import receipt details retrieved successfully
@@ -197,7 +212,7 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *         description: Import receipt ID
- *     tags: [Import Receipts]
+ *     tags: [ImportReceipt]
  *     requestBody:
  *       required: true
  *       content:
@@ -222,7 +237,7 @@ const router = express.Router();
  * @swagger
  * /import-receipt/{id}/process:
  *   post:
- *     summary: Process an approved import receipt
+ *     summary: Process an approved import receipt (create equipment)
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -234,10 +249,10 @@ const router = express.Router();
  *         schema:
  *           type: integer
  *         description: Import receipt ID
- *     tags: [Import Receipts]
+ *     tags: [ImportReceipt]
  *     responses:
  *       200:
- *         description: Import receipt processed successfully
+ *         description: Import receipt processed successfully and equipment created
  *       400:
  *         description: Cannot process the receipt
  */

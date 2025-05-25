@@ -12,6 +12,10 @@ function model(sequelize) {
             autoIncrement: true,
             allowNull: false,
         },
+        prefix: {
+            type: DataTypes.STRING(10),
+            allowNull: false,
+        },
         manufacturer_name: {
             type: DataTypes.STRING(255),
             allowNull: false,

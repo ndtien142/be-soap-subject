@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const equipmentManufacturerController = require('../../controllers/equipmentManufacturer.controller');
+const permissionController = require('../../controllers/permission.controller');
 const { asyncHandler } = require('../../helpers/asyncHandler');
 const { authenticationV2 } = require('../../auth/authUtils');
 
@@ -10,134 +10,110 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: EquipmentManufacturer
- *   description: Equipment Manufacturer management APIs
+ *   name: Permission
+ *   description: Permission management APIs
  */
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     EquipmentManufacturer:
+ *     Permission:
  *       type: object
  *       properties:
  *         id:
  *           type: integer
- *         name:
+ *         permissionName:
  *           type: string
- *         prefix:
+ *         permissionDescription:
  *           type: string
- *           description: Prefix for the manufacturer
- *         contactInfo:
+ *         slug:
  *           type: string
- *         address:
- *           type: string
- *         isActive:
- *           type: boolean
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *     CreateManufacturerInput:
+ *     CreatePermissionInput:
  *       type: object
  *       required:
- *         - name
- *         - prefix
+ *         - permissionName
+ *         - permissionDescription
+ *         - slug
  *       properties:
- *         name:
+ *         permissionName:
  *           type: string
- *         prefix:
+ *         permissionDescription:
  *           type: string
- *           description: Prefix for the manufacturer
- *         contactInfo:
+ *         slug:
  *           type: string
- *         address:
- *           type: string
- *     UpdateManufacturerInput:
+ *     UpdatePermissionInput:
  *       type: object
  *       required:
  *         - id
- *         - name
- *         - prefix
  *       properties:
  *         id:
  *           type: integer
- *         name:
+ *         permissionName:
  *           type: string
- *         prefix:
+ *         permissionDescription:
  *           type: string
- *           description: Prefix for the manufacturer
- *         contactInfo:
- *           type: string
- *         address:
+ *         slug:
  *           type: string
  */
 
 /**
  * @swagger
- * /equipment-manufacturer:
+ * /permission:
  *   post:
- *     summary: Create a new manufacturer
+ *     summary: Create a new permission
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *     tags: [EquipmentManufacturer]
+ *     tags: [Permission]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateManufacturerInput'
+ *             $ref: '#/components/schemas/CreatePermissionInput'
  *     responses:
  *       200:
- *         description: Manufacturer created successfully
+ *         description: Permission created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/EquipmentManufacturer'
+ *               $ref: '#/components/schemas/Permission'
  */
 
 /**
  * @swagger
- * /equipment-manufacturer:
+ * /permission:
  *   put:
- *     summary: Update an existing manufacturer
- *     tags: [EquipmentManufacturer]
+ *     summary: Update a permission
  *     security:
  *       - BearerAuth: []
  *     parameters:
  *       - $ref: '#/components/parameters/UserCodeHeader'
  *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
+ *     tags: [Permission]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateManufacturerInput'
+ *             $ref: '#/components/schemas/UpdatePermissionInput'
  *     responses:
  *       200:
- *         description: Manufacturer updated successfully
+ *         description: Permission updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/EquipmentManufacturer'
+ *               $ref: '#/components/schemas/Permission'
  */
 
 /**
  * @swagger
- * /equipment-manufacturer/{id}:
+ * /permission/{id}:
  *   delete:
- *     summary: Delete a manufacturer
- *     tags: [EquipmentManufacturer]
+ *     summary: Delete a permission
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -148,17 +124,17 @@ const router = express.Router();
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [Permission]
  *     responses:
  *       200:
- *         description: Manufacturer deleted successfully
+ *         description: Permission deleted successfully
  */
 
 /**
  * @swagger
- * /equipment-manufacturer:
+ * /permission:
  *   get:
- *     summary: Get all manufacturers
- *     tags: [EquipmentManufacturer]
+ *     summary: Get all permissions
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -172,23 +148,37 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *     tags: [Permission]
  *     responses:
  *       200:
- *         description: List of manufacturers retrieved successfully
+ *         description: List of permissions
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/EquipmentManufacturer'
+ *               type: object
+ *               properties:
+ *                 metadata:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Permission'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     itemPerPage:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
  */
 
 /**
  * @swagger
- * /equipment-manufacturer/{id}:
+ * /permission/{id}:
  *   get:
- *     summary: Get manufacturer by ID
- *     tags: [EquipmentManufacturer]
+ *     summary: Get permission by ID
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -199,36 +189,22 @@ const router = express.Router();
  *         required: true
  *         schema:
  *           type: integer
+ *     tags: [Permission]
  *     responses:
  *       200:
- *         description: Manufacturer retrieved successfully
+ *         description: Permission details
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/EquipmentManufacturer'
+ *               $ref: '#/components/schemas/Permission'
  */
 
 router.use(authenticationV2);
 
-router.post(
-    '',
-    asyncHandler(equipmentManufacturerController.createManufacturer),
-);
-router.put(
-    '/:id',
-    asyncHandler(equipmentManufacturerController.updateManufacturer),
-);
-router.delete(
-    '/:id',
-    asyncHandler(equipmentManufacturerController.deleteManufacturer),
-);
-router.get(
-    '',
-    asyncHandler(equipmentManufacturerController.getAllManufacturers),
-);
-router.get(
-    '/:id',
-    asyncHandler(equipmentManufacturerController.getManufacturerById),
-);
+router.post('', asyncHandler(permissionController.createPermission));
+router.put('', asyncHandler(permissionController.updatePermission));
+router.delete('/:id', asyncHandler(permissionController.deletePermission));
+router.get('', asyncHandler(permissionController.getAllPermissions));
+router.get('/:id', asyncHandler(permissionController.getPermissionById));
 
 module.exports = router;
