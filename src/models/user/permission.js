@@ -20,6 +20,11 @@ function model(sequelize) {
             type: DataTypes.TEXT,
             allowNull: false,
         },
+        slug: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+            unique: true,
+        },
     };
 
     const options = {
