@@ -213,11 +213,8 @@ class ImportReceiptService {
         // Create equipment entries for each item in the detail import receipt
         const createdEquipments = [];
         for (const detail of importReceipt.group_equipment) {
-            const dateOfActualReceived =
-                new Date(importReceipt.date_of_actual_received) ||
-                new Date().toISOString().split('T')[0];
-            const month = new Date(dateOfActualReceived).getMonth() + 1;
-            const date = new Date(dateOfActualReceived).getDate();
+            const month = new Date().getMonth() + 1;
+            const date = new Date().getDate();
 
             for (let i = 0; i < detail.DetailImportReceipt.quantity; i++) {
                 // crate serial number
