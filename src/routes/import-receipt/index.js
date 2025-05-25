@@ -35,12 +35,6 @@ const router = express.Router();
  *         id:
  *           type: integer
  *           description: Supplier ID
- *     ImportReceiptUser:
- *       type: object
- *       properties:
- *         code:
- *           type: string
- *           description: User code
  *     ImportReceipt:
  *       type: object
  *       properties:
@@ -62,8 +56,6 @@ const router = express.Router();
  *         status:
  *           type: string
  *           enum: [requested, approved, rejected, completed]
- *         user:
- *           $ref: '#/components/schemas/ImportReceiptUser'
  *         items:
  *           type: array
  *           items:
@@ -150,7 +142,6 @@ const router = express.Router();
  *               - items
  *               - dateOfReceived
  *               - dateOfOrder
- *               - user
  *             properties:
  *               supplier:
  *                 $ref: '#/components/schemas/ImportReceiptSupplier'
@@ -166,8 +157,6 @@ const router = express.Router();
  *                 format: date
  *               note:
  *                 type: string
- *               user:
- *                 $ref: '#/components/schemas/ImportReceiptUser'
  *     responses:
  *       200:
  *         description: Import receipt created successfully

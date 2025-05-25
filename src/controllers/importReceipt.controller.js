@@ -5,7 +5,10 @@ class ImportReceiptController {
     createNewImportReceipt = async (req, res, next) => {
         new CREATED({
             message: 'Create new import receipt successfully',
-            metadata: await ImportReceiptService.createImportReceipt(req.body),
+            metadata: await ImportReceiptService.createImportReceipt({
+                ...req.body,
+                user: req.user,
+            }),
         }).send(res);
     };
     getAllImportReceipts = async (req, res, next) => {
@@ -31,6 +34,7 @@ class ImportReceiptController {
                 req.params.id,
                 req.body.status,
                 req.body.reason,
+                req.user,
             ),
         }).send(res);
     };

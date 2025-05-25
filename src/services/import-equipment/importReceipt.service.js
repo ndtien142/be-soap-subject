@@ -38,7 +38,7 @@ class ImportReceiptService {
 
         // Check if user exists
         const userData = await database.Account.findOne({
-            where: { user_code: user.code },
+            where: { user_code: user.userCode },
             transaction,
         });
         if (!userData) {
@@ -87,7 +87,7 @@ class ImportReceiptService {
         return {
             code: 200,
             message: 'Import receipt created successfully',
-            data: {
+            metadata: {
                 id: importReceipt.id,
                 supplier: {
                     id: supplierData.id,
@@ -118,6 +118,7 @@ class ImportReceiptService {
         importReceiptId,
         status,
         reason = null,
+        user,
     ) {
         // Check if the import receipt exists
         const importReceipt = await database.ImportReceipt.findOne({
@@ -134,12 +135,19 @@ class ImportReceiptService {
             );
         }
 
-        // Update the status and optionally add a reason
+        // Update the status and optionally add a reason and approver
         if (status === IMPORT_RECEIPT_STATUS.approved) {
             importReceipt.status = IMPORT_RECEIPT_STATUS.approved;
+            if (user) {
+                console.log('User:', user);
+                importReceipt.approve_by = user.userCode;
+            }
         } else if (status === IMPORT_RECEIPT_STATUS.rejected) {
             importReceipt.status = IMPORT_RECEIPT_STATUS.rejected;
             importReceipt.note = reason || 'No reason provided';
+            if (user) {
+                importReceipt.approve_by = user.userCode;
+            }
         } else {
             throw new BadRequestError('Invalid status update');
         }
@@ -149,10 +157,11 @@ class ImportReceiptService {
         return {
             code: 200,
             message: `Import receipt ${status} successfully`,
-            data: {
+            metadata: {
                 id: importReceipt.id,
                 status: importReceipt.status,
                 note: importReceipt.note,
+                approveBy: importReceipt.approve_by,
                 updatedAt: importReceipt.updatedAt,
             },
         };
@@ -179,19 +188,13 @@ class ImportReceiptService {
                     attributes: ['user_code', 'username', 'email', 'is_active'],
                 },
                 {
-                    model: database.DetailImportReceipt,
-                    as: 'DetailImportReceipts',
-                    include: [
-                        {
-                            model: database.GroupEquipment,
-                            as: 'GroupEquipment',
-                            attributes: [
-                                'group_equipment_code',
-                                'group_equipment_name',
-                                'equipment_type_id',
-                                'equipment_manufacturer_id',
-                            ],
-                        },
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
+                    attributes: [
+                        'group_equipment_code',
+                        'group_equipment_name',
+                        'equipment_type_id',
+                        'equipment_manufacturer_id',
                     ],
                 },
             ],
@@ -209,31 +212,23 @@ class ImportReceiptService {
 
         // Create equipment entries for each item in the detail import receipt
         const createdEquipments = [];
-        for (const detail of importReceipt.DetailImportReceipts) {
-            const { group_equipment_code, quantity, GroupEquipment } = detail;
+        for (const detail of importReceipt.group_equipment) {
+            const dateOfActualReceived =
+                new Date(importReceipt.date_of_actual_received) ||
+                new Date().toISOString().split('T')[0];
+            const month = new Date(dateOfActualReceived).getMonth() + 1;
+            const date = new Date(dateOfActualReceived).getDate();
 
-            // Fetch type and manufacturer prefix for serial number
-            const type = await database.EquipmentType.findOne({
-                where: { id: GroupEquipment.equipment_type_id },
-            });
-            const manufacturer = await database.EquipmentManufacturer.findOne({
-                where: { id: GroupEquipment.equipment_manufacturer_id },
-            });
+            for (let i = 0; i < detail.DetailImportReceipt.quantity; i++) {
+                // crate serial number
+                const serialNumber = `${detail.group_equipment_code}-${date}.${month}-${importReceiptId}-${i + 1}`;
 
-            const typePrefix = type ? type.prefix : 'TYP';
-            const manufacturerPrefix = manufacturer
-                ? manufacturer.prefix
-                : 'MAN';
-            const year = new Date().getFullYear();
-
-            for (let i = 0; i < quantity; i++) {
-                const serialNumber = `${typePrefix}-${manufacturerPrefix}-${group_equipment_code}-${year}-${importReceiptId}-${i + 1}`;
                 const equipment = await database.Equipment.create({
                     serial_number: serialNumber,
-                    group_equipment_code,
+                    group_equipment_code: detail.group_equipment_code,
                     status: 'available',
                     import_receipt_id: importReceiptId,
-                    equipment_description: null,
+                    equipment_description: `date: ${date}, month: ${month}, import receipt id: ${importReceiptId}`,
                     equipment_location: null,
                     day_of_first_use: null,
                     room_id: null,
@@ -243,14 +238,17 @@ class ImportReceiptService {
         }
 
         // Update the import receipt status to completed
-        importReceipt.status = IMPORT_RECEIPT_STATUS.completed;
+        importReceipt.status = 'received';
+        importReceipt.date_of_actual_received = new Date()
+            .toISOString()
+            .split('T')[0];
         await importReceipt.save();
 
         return {
             code: 200,
             message:
                 'Import receipt processed successfully, and equipment created',
-            data: {
+            metadata: {
                 id: importReceipt.id,
                 dateOfOrder: importReceipt.date_of_order,
                 dateOfReceived: importReceipt.date_of_received,
@@ -270,12 +268,11 @@ class ImportReceiptService {
                     email: importReceipt.Account.email,
                     isActive: importReceipt.Account.is_active,
                 },
-                items: importReceipt.DetailImportReceipts.map((detail) => ({
-                    groupEquipmentCode: detail.group_equipment_code,
-                    groupEquipmentName:
-                        detail.GroupEquipment.group_equipment_name,
-                    price: detail.price,
-                    quantity: detail.quantity,
+                items: importReceipt.group_equipment.map((detail) => ({
+                    code: detail.group_equipment_code,
+                    name: detail.group_equipment_name,
+                    price: detail.DetailImportReceipt.price,
+                    quantity: detail.DetailImportReceipt.quantity,
                 })),
                 createdEquipments: createdEquipments.map((eq) => ({
                     serialNumber: eq.serial_number,
@@ -334,7 +331,7 @@ class ImportReceiptService {
                     phone: receipt.Supplier.supplier_phone,
                     email: receipt.Supplier.supplier_email,
                 },
-                user: {
+                requestedUser: {
                     code: receipt.Account.user_code,
                     username: receipt.Account.username,
                     email: receipt.Account.email,
@@ -371,21 +368,24 @@ class ImportReceiptService {
                     attributes: ['user_code', 'username', 'email', 'is_active'],
                 },
                 {
-                    model: database.DetailImportReceipt,
-                    as: 'DetailImportReceipts',
-                    include: [
-                        {
-                            model: database.GroupEquipment,
-                            as: 'GroupEquipment',
-                            attributes: [
-                                'group_equipment_code',
-                                'group_equipment_name',
-                            ],
-                        },
-                    ],
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
                 },
             ],
         });
+
+        if (importReceipt.approve_by) {
+            const approver = await database.Account.findOne({
+                where: { user_code: importReceipt.approve_by },
+                attributes: ['user_code', 'username', 'email', 'is_active'],
+            });
+            importReceipt.approvedBy = {
+                code: approver.user_code,
+                username: approver.username,
+                email: approver.email,
+                isActive: approver.is_active,
+            };
+        }
 
         if (!importReceipt) {
             throw new BadRequestError('Import receipt not found');
@@ -394,7 +394,7 @@ class ImportReceiptService {
         return {
             code: 200,
             message: 'Get import receipt details successfully',
-            data: {
+            metadata: {
                 id: importReceipt.id,
                 dateOfOrder: importReceipt.date_of_order,
                 dateOfReceived: importReceipt.date_of_received,
@@ -408,18 +408,18 @@ class ImportReceiptService {
                     phone: importReceipt.Supplier.supplier_phone,
                     email: importReceipt.Supplier.supplier_email,
                 },
-                user: {
+                requestedUser: {
                     code: importReceipt.Account.user_code,
                     username: importReceipt.Account.username,
                     email: importReceipt.Account.email,
                     isActive: importReceipt.Account.is_active,
                 },
-                items: importReceipt.DetailImportReceipts.map((detail) => ({
-                    groupEquipmentCode: detail.group_equipment_code,
-                    groupEquipmentName:
-                        detail.GroupEquipment.group_equipment_name,
-                    price: detail.price,
-                    quantity: detail.quantity,
+                approvedBy: importReceipt.approvedBy || null,
+                items: importReceipt.group_equipment.map((item) => ({
+                    code: item.group_equipment_code,
+                    name: item.group_equipment_name,
+                    price: item.DetailImportReceipt.price,
+                    quantity: item.DetailImportReceipt.quantity,
                 })),
             },
         };
