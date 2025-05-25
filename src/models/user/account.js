@@ -22,6 +22,8 @@ function model(sequelize) {
             allowNull: false,
             references: { model: 'tb_role', key: 'id' },
         },
+        email: { type: DataTypes.STRING(255), allowNull: true },
+        phone_number: { type: DataTypes.STRING(20), allowNull: true },
         is_active: { type: DataTypes.BOOLEAN, allowNull: false },
         is_block: { type: DataTypes.BOOLEAN, allowNull: false },
     };
