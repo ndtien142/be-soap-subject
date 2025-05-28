@@ -3,7 +3,6 @@
 const express = require('express');
 const permissionController = require('../../controllers/permission.controller');
 const { asyncHandler } = require('../../helpers/asyncHandler');
-const { authenticationV2 } = require('../../auth/authUtils');
 
 const router = express.Router();
 
@@ -65,8 +64,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Permission]
  *     requestBody:
  *       required: true
@@ -91,8 +88,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Permission]
  *     requestBody:
  *       required: true
@@ -117,8 +112,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -138,8 +131,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -182,8 +173,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -198,8 +187,6 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Permission'
  */
-
-router.use(authenticationV2);
 
 router.post('', asyncHandler(permissionController.createPermission));
 router.put('', asyncHandler(permissionController.updatePermission));
