@@ -7,14 +7,14 @@ class EquipmentController {
     createEquipment = async (req, res, next) => {
         new CREATED({
             message: 'Create equipment successfully',
-            data: await EquipmentService.createEquipment(req.body),
+            metadata: await EquipmentService.createEquipment(req.body),
         }).send(res);
     };
 
     updateEquipment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Update equipment successfully',
-            data: await EquipmentService.updateEquipment(
+            metadata: await EquipmentService.updateEquipment(
                 req.params.serialNumber,
                 req.body,
             ),
@@ -24,7 +24,7 @@ class EquipmentController {
     deleteEquipment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Delete equipment successfully',
-            data: await EquipmentService.deleteEquipment(
+            metadata: await EquipmentService.deleteEquipment(
                 req.params.serialNumber,
             ),
         }).send(res);
@@ -33,7 +33,7 @@ class EquipmentController {
     getEquipmentBySerialNumber = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get equipment by serial number successfully',
-            data: await EquipmentService.getEquipmentBySerialNumber(
+            metadata: await EquipmentService.getEquipmentBySerialNumber(
                 req.params.serialNumber,
             ),
         }).send(res);
@@ -42,7 +42,7 @@ class EquipmentController {
     getAllEquipment = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all equipment successfully',
-            data: await EquipmentService.getAllEquipment(req.query),
+            metadata: await EquipmentService.getAllEquipment(req.query),
         }).send(res);
     };
 }

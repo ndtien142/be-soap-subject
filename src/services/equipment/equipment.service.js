@@ -96,6 +96,11 @@ class EquipmentService {
                 {
                     model: database.ImportReceipt,
                     as: 'import_receipt',
+                    include: [
+                        {
+                            model: database.Account,
+                        },
+                    ],
                 },
                 {
                     model: database.Room,
@@ -109,7 +114,32 @@ class EquipmentService {
         return {
             code: 200,
             message: 'Get equipment by serial number successfully',
-            data: equipment,
+            metadata: {
+                serialNumber: equipment.serial_number,
+                dayOfFirstUse: equipment.day_of_first_use,
+                description: equipment.equipment_description,
+                location: equipment.equipment_location,
+                status: equipment.status,
+                importReceipt: {
+                    id: equipment.import_receipt_id,
+                    userCode: equipment.import_receipt?.user_code,
+                    approvedBy: equipment.import_receipt.approved_by,
+                    receivedAt: equipment.import_receipt.date_of_received,
+                    note: equipment.import_receipt.note,
+                },
+                groupEquipment: equipment.group_equipment
+                    ? {
+                          code: equipment.group_equipment.group_equipment_code,
+                          name: equipment.group_equipment.group_equipment_name,
+                      }
+                    : null,
+                room: equipment.room
+                    ? {
+                          id: equipment.room.id,
+                          name: equipment.room.name,
+                      }
+                    : null,
+            },
         };
     }
 
@@ -126,6 +156,11 @@ class EquipmentService {
                 {
                     model: database.ImportReceipt,
                     as: 'import_receipt',
+                    include: [
+                        {
+                            model: database.Account,
+                        },
+                    ],
                 },
                 {
                     model: database.Room,
@@ -136,7 +171,36 @@ class EquipmentService {
         return {
             code: 200,
             message: 'Get all equipment successfully',
-            metadata: result.rows,
+            metadata: result.rows.map((equipment) => {
+                return {
+                    serialNumber: equipment.serial_number,
+                    dayOfFirstUse: equipment.day_of_first_use,
+                    description: equipment.equipment_description,
+                    location: equipment.equipment_location,
+                    status: equipment.status,
+                    importReceipt: {
+                        id: equipment.import_receipt_id,
+                        userCode: equipment.import_receipt?.user_code,
+                        approvedBy: equipment.import_receipt.approved_by,
+                        receivedAt: equipment.import_receipt.date_of_received,
+                        note: equipment.import_receipt.note,
+                    },
+                    groupEquipment: equipment.group_equipment
+                        ? {
+                              code: equipment.group_equipment
+                                  .group_equipment_code,
+                              name: equipment.group_equipment
+                                  .group_equipment_name,
+                          }
+                        : null,
+                    room: equipment.room
+                        ? {
+                              id: equipment.room.id,
+                              name: equipment.room.name,
+                          }
+                        : null,
+                };
+            }),
             meta: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),

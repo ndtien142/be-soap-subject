@@ -7,6 +7,7 @@ const {
 
 const sequelize = new Sequelize(name, user, password, {
     host: host,
+    port: port,
     dialect: dialect,
 });
 
