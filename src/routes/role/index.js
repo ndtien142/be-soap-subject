@@ -3,7 +3,7 @@
 const express = require('express');
 const roleController = require('../../controllers/role.controller');
 const { asyncHandler } = require('../../helpers/asyncHandler');
-const { authenticationV2 } = require('../../auth/authUtils');
+// const { authenticationV2 } = require('../../auth/authUtils');
 
 const router = express.Router();
 
@@ -82,8 +82,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -108,8 +106,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -134,8 +130,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -155,8 +149,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -199,8 +191,6 @@ const router = express.Router();
  *     security:
  *       - BearerAuth: []
  *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -216,7 +206,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Role'
  */
 
-router.use(authenticationV2);
+// router.use(authenticationV2);
 
 router.post('', asyncHandler(roleController.createRole));
 router.put('', asyncHandler(roleController.updateRole));
