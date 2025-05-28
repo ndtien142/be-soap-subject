@@ -1,5 +1,8 @@
 const swaggerJSDoc = require('swagger-jsdoc');
 
+const SERVER_URL =
+    process.env.SWAGGER_SERVER_URL || 'http://localhost:3055/v1/api';
+
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -44,12 +47,8 @@ const options = {
         ],
         servers: [
             {
-                url: 'http://localhost:3055/v1/api',
-                description: 'Local network server',
-            },
-            {
-                url: 'http://localhost:3052/v1/api',
-                description: 'Local network server',
+                url: SERVER_URL,
+                description: 'Dynamic server based on environment',
             },
         ],
     },
