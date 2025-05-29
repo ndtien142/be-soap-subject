@@ -6,9 +6,15 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
         user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
+            unique: true,
         },
         privateKey: {
             type: DataTypes.TEXT,

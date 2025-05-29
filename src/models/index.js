@@ -268,7 +268,7 @@ database.Room.belongsTo(database.Department, {
 
 // Sync the models with the database
 sequelize
-    .sync({ sync: true })
+    .sync()
     .then(() => {
         console.log('Database & tables created!');
     })

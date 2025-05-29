@@ -10,7 +10,6 @@ function model(sequelize) {
             type: DataTypes.TINYINT,
             autoIncrement: true,
             primaryKey: true,
-            allowNull: false,
         },
         role_name: {
             type: DataTypes.STRING(255),

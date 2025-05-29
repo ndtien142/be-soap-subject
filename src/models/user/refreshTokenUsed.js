@@ -6,6 +6,11 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
         token: {
             type: DataTypes.TEXT,
             allowNull: false,
