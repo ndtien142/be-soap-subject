@@ -159,6 +159,11 @@ database.Equipment.belongsTo(database.GroupEquipment, {
     as: 'group_equipment',
 });
 
+database.GroupEquipment.hasMany(database.Equipment, {
+    foreignKey: 'group_equipment_code',
+    as: 'equipments',
+});
+
 database.Equipment.belongsTo(database.Room, {
     foreignKey: 'room_id',
     as: 'room',
