@@ -304,6 +304,14 @@ class ImportReceiptService {
                     as: 'Account',
                     attributes: ['user_code', 'username', 'email', 'is_active'],
                 },
+                {
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
+                    attributes: [
+                        'group_equipment_code',
+                        'group_equipment_name',
+                    ],
+                },
             ],
         });
 
@@ -334,6 +342,12 @@ class ImportReceiptService {
                     email: receipt.Account.email,
                     isActive: receipt.Account.is_active,
                 },
+                items: receipt.group_equipment.map((item) => ({
+                    code: item.group_equipment_code,
+                    name: item.group_equipment_name,
+                    price: parseInt(item.DetailImportReceipt?.price) || null,
+                    quantity: item.DetailImportReceipt?.quantity || null,
+                })),
             })),
             meta: {
                 currentPage: parseInt(page),
