@@ -68,6 +68,9 @@ const BorrowReceipt = require('./borrow-receipt/borrowReceipt')(sequelize);
 const BorrowReceiptDetail = require('./borrow-receipt/borrowReceiptDetail')(
     sequelize,
 );
+const BorrowRequestItem = require('./borrow-receipt/borrowRequestItem')(
+    sequelize,
+);
 
 // Import models for files and images
 const EquipmentImages = require('./files/equipmentImages')(sequelize);
@@ -106,6 +109,7 @@ database.TransferReceiptDetail = TransferReceiptDetail;
 // Borrow receipt
 database.BorrowReceipt = BorrowReceipt;
 database.BorrowReceiptDetail = BorrowReceiptDetail;
+database.BorrowRequestItem = BorrowRequestItem;
 
 // Files and images
 database.EquipmentImages = EquipmentImages;
@@ -253,6 +257,11 @@ database.Equipment.belongsToMany(database.TransferReceipt, {
 // Borrow receipt associations
 database.BorrowReceipt.belongsTo(database.Account, {
     foreignKey: 'user_code',
+    as: 'account',
+});
+database.BorrowReceipt.belongsTo(database.Room, {
+    foreignKey: 'room_id',
+    as: 'room',
 });
 database.BorrowReceipt.belongsToMany(database.Equipment, {
     through: BorrowReceiptDetail,
@@ -262,6 +271,16 @@ database.BorrowReceipt.belongsToMany(database.Equipment, {
 database.Equipment.belongsToMany(database.BorrowReceipt, {
     through: BorrowReceiptDetail,
     foreignKey: 'serial_number',
+    as: 'borrow_receipts',
+});
+database.BorrowReceipt.belongsToMany(database.GroupEquipment, {
+    through: BorrowRequestItem,
+    foreignKey: 'borrow_id',
+    as: 'group_equipment',
+});
+database.GroupEquipment.belongsToMany(database.BorrowReceipt, {
+    through: BorrowRequestItem,
+    foreignKey: 'equipment_code',
     as: 'borrow_receipts',
 });
 

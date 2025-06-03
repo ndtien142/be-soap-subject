@@ -14,7 +14,7 @@ function model(sequelize) {
         },
         borrow_date: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         return_date: {
             type: DataTypes.DATE,
@@ -32,6 +32,7 @@ function model(sequelize) {
             type: DataTypes.ENUM(
                 'requested',
                 'approved',
+                'processing',
                 'rejected',
                 'returned',
                 'borrowed',
@@ -42,6 +43,15 @@ function model(sequelize) {
         note: {
             type: DataTypes.STRING(1000),
             allowNull: true,
+        },
+        room_id: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+        },
+        is_partial: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
         },
     };
 

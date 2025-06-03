@@ -25,6 +25,13 @@ const router = express.Router();
  *           type: string
  *         note:
  *           type: string
+ *     BorrowGroupItem:
+ *       type: object
+ *       properties:
+ *         groupEquipmentCode:
+ *           type: string
+ *         quantity:
+ *           type: integer
  *     BorrowReceipt:
  *       type: object
  *       properties:
@@ -45,10 +52,10 @@ const router = express.Router();
  *           type: string
  *         roomId:
  *           type: string
- *         items:
+ *         groups:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/BorrowReceiptItem'
+ *             $ref: '#/components/schemas/BorrowGroupItem'
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -60,8 +67,8 @@ const router = express.Router();
  *       required:
  *         - userCode
  *         - borrowDate
- *         - items
  *         - roomId
+ *         - type
  *       properties:
  *         userCode:
  *           type: string
@@ -75,10 +82,13 @@ const router = express.Router();
  *           type: string
  *         roomId:
  *           type: string
- *         items:
+ *         type:
+ *           type: string
+ *           enum: [specific, group]
+ *         groups:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/BorrowReceiptItem'
+ *             $ref: '#/components/schemas/BorrowGroupItem'
  */
 
 /**
@@ -109,9 +119,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /borrow-receipt/{id}/approve:
+ * /borrow-receipt/{id}/action:
  *   put:
- *     summary: Approve a borrow receipt
+ *     summary: Perform an action on a borrow receipt (approve, reject, mark-borrowed, mark-returned)
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -130,85 +140,14 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               approverCode:
+ *               action:
  *                 type: string
- *     responses:
- *       200:
- *         description: Borrow receipt approved
- */
-
-/**
- * @swagger
- * /borrow-receipt/{id}/reject:
- *   put:
- *     summary: Reject a borrow receipt
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     tags: [BorrowReceipt]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               approverCode:
- *                 type: string
+ *                 enum: [approve, reject, mark-borrowed, mark-returned]
  *               reason:
  *                 type: string
  *     responses:
  *       200:
- *         description: Borrow receipt rejected
- */
-
-/**
- * @swagger
- * /borrow-receipt/{id}/mark-borrowed:
- *   put:
- *     summary: Mark a borrow receipt as borrowed and update equipment room
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     tags: [BorrowReceipt]
- *     responses:
- *       200:
- *         description: Borrow receipt marked as borrowed
- */
-
-/**
- * @swagger
- * /borrow-receipt/{id}/mark-returned:
- *   put:
- *     summary: Mark a borrow receipt as returned and update equipment status
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - $ref: '#/components/parameters/UserCodeHeader'
- *       - $ref: '#/components/parameters/RefreshTokenHeader'
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     tags: [BorrowReceipt]
- *     responses:
- *       200:
- *         description: Borrow receipt marked as returned
+ *         description: Action performed on borrow receipt
  */
 
 /**
@@ -280,25 +219,149 @@ const router = express.Router();
  *               $ref: '#/components/schemas/BorrowReceipt'
  */
 
+/**
+ * @swagger
+ * /borrow-receipt/check-available:
+ *   post:
+ *     summary: Check equipment available for multiple groupEquipmentCode and quantity
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               groups:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/BorrowGroupItem'
+ *     tags: [BorrowReceipt]
+ *     responses:
+ *       200:
+ *         description: Equipment availability for each group
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       groupEquipmentCode:
+ *                         type: string
+ *                       requested:
+ *                         type: integer
+ *                       available:
+ *                         type: boolean
+ *                       availableCount:
+ *                         type: integer
+ */
+
+/**
+ * @swagger
+ * /borrow-receipt/scan-export:
+ *   post:
+ *     summary: Scan and export a single equipment for a borrow receipt
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *     tags: [BorrowReceipt]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               borrowReceiptId:
+ *                 type: integer
+ *               serialNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Equipment scanned and exported
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 borrowReceiptId:
+ *                   type: integer
+ *                 serialNumber:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 isPartial:
+ *                   type: boolean
+ *                 actualQuantity:
+ *                   type: integer
+ *                 totalRequested:
+ *                   type: integer
+ */
+
+/**
+ * @swagger
+ * /borrow-receipt/delete-scanned-equipment:
+ *   post:
+ *     summary: Delete a scanned equipment from a borrow receipt (undo scan)
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *     tags: [BorrowReceipt]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               borrowReceiptId:
+ *                 type: integer
+ *               serialNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Scanned equipment deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 borrowReceiptId:
+ *                   type: integer
+ *                 serialNumber:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+
 router.use(authenticationV2);
 
 router.post('', asyncHandler(borrowReceiptController.createBorrowReceipt));
-router.put(
-    '/:id/approve',
-    asyncHandler(borrowReceiptController.approveBorrowReceipt),
+router.post(
+    '/check-available',
+    asyncHandler(borrowReceiptController.checkEquipmentAvailable),
 );
-router.put(
-    '/:id/reject',
-    asyncHandler(borrowReceiptController.rejectBorrowReceipt),
+router.post(
+    '/scan-export',
+    asyncHandler(borrowReceiptController.scanAndExportEquipment),
 );
-router.put(
-    '/:id/mark-borrowed',
-    asyncHandler(borrowReceiptController.markAsBorrowed),
+router.post(
+    '/delete-scanned-equipment',
+    asyncHandler(borrowReceiptController.deleteScannedEquipment),
 );
-router.put(
-    '/:id/mark-returned',
-    asyncHandler(borrowReceiptController.markAsReturned),
-);
+router.put('/:id/action', asyncHandler(borrowReceiptController.handleAction));
 router.get('', asyncHandler(borrowReceiptController.getAllBorrowReceipts));
 router.get(
     '/:id',

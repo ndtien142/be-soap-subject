@@ -7,58 +7,99 @@ class BorrowReceiptController {
     createBorrowReceipt = async (req, res, next) => {
         new CREATED({
             message: 'Create borrow receipt successfully',
-            data: await BorrowReceiptService.createBorrowReceipt(req.body),
+            metadata: await BorrowReceiptService.createBorrowReceipt({
+                ...req.body,
+                user: req.user,
+            }),
         }).send(res);
     };
 
-    approveBorrowReceipt = async (req, res, next) => {
+    handleAction = async (req, res, next) => {
+        const { action, reason } = req.body;
+        let result;
+        switch (action) {
+            case 'approve':
+                result = await BorrowReceiptService.approveBorrowReceipt(
+                    req.params.id,
+                    req.user.userCode,
+                );
+                break;
+            case 'reject':
+                result = await BorrowReceiptService.rejectBorrowReceipt(
+                    req.params.id,
+                    req.user.userCode,
+                    reason,
+                );
+                break;
+            case 'mark-borrowed':
+                result = await BorrowReceiptService.markAsBorrowed(
+                    req.params.id,
+                );
+                break;
+            case 'mark-returned':
+                result = await BorrowReceiptService.markAsReturned(
+                    req.params.id,
+                );
+                break;
+            default:
+                return res.status(400).json({ message: 'Invalid action' });
+        }
         new SuccessResponse({
-            message: 'Approve borrow receipt successfully',
-            data: await BorrowReceiptService.approveBorrowReceipt(
-                req.params.id,
-                req.body.approverCode,
-            ),
-        }).send(res);
-    };
-
-    rejectBorrowReceipt = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Reject borrow receipt successfully',
-            data: await BorrowReceiptService.rejectBorrowReceipt(
-                req.params.id,
-                req.body.approverCode,
-                req.body.reason,
-            ),
-        }).send(res);
-    };
-
-    markAsBorrowed = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Mark as borrowed successfully',
-            data: await BorrowReceiptService.markAsBorrowed(req.params.id),
-        }).send(res);
-    };
-
-    markAsReturned = async (req, res, next) => {
-        new SuccessResponse({
-            message: 'Mark as returned successfully',
-            data: await BorrowReceiptService.markAsReturned(req.params.id),
+            message: 'Action performed successfully',
+            metadata: result,
         }).send(res);
     };
 
     getAllBorrowReceipts = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all borrow receipts successfully',
-            data: await BorrowReceiptService.getAllBorrowReceipts(req.query),
+            metadata: await BorrowReceiptService.getAllBorrowReceipts(
+                req.query,
+            ),
         }).send(res);
     };
 
     getBorrowReceiptDetails = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get borrow receipt details successfully',
-            data: await BorrowReceiptService.getBorrowReceiptDetails(
+            metadata: await BorrowReceiptService.getBorrowReceiptDetails(
                 req.params.id,
             ),
+        }).send(res);
+    };
+
+    checkEquipmentAvailable = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Check equipment available',
+            metadata: await BorrowReceiptService.checkEquipmentAvailable(
+                req.query,
+            ),
+        }).send(res);
+    };
+
+    scanAndExportEquipment = async (req, res, next) => {
+        const { borrowReceiptId, serialNumber } = req.body;
+        new SuccessResponse({
+            message: 'Scan and export equipment',
+            metadata: await BorrowReceiptService.scanAndExportEquipment({
+                borrowReceiptId,
+                serialNumber,
+            }),
+        }).send(res);
+    };
+
+    /**
+     * Remove a scanned equipment from a borrow receipt (undo scan).
+     * Expects: { borrowReceiptId, serialNumber } in req.body
+     */
+    deleteScannedEquipment = async (req, res, next) => {
+        const { borrowReceiptId, serialNumber } = req.body;
+        new SuccessResponse({
+            message: 'Delete scanned equipment',
+            metadata: await BorrowReceiptService.deleteScannedEquipment({
+                borrowReceiptId,
+                serialNumber,
+            }),
         }).send(res);
     };
 }
