@@ -7,12 +7,12 @@ module.exports = model;
 function model(sequelize) {
     const attributes = {
         serial_number: {
-            type: DataTypes.STRING(20),
+            type: DataTypes.STRING(100),
             primaryKey: true,
             allowNull: false,
         },
         group_equipment_code: {
-            type: DataTypes.STRING(20),
+            type: DataTypes.STRING(100),
             allowNull: false,
         },
         day_of_first_use: {

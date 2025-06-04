@@ -304,6 +304,14 @@ class ImportReceiptService {
                     as: 'Account',
                     attributes: ['user_code', 'username', 'email', 'is_active'],
                 },
+                {
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
+                    attributes: [
+                        'group_equipment_code',
+                        'group_equipment_name',
+                    ],
+                },
             ],
         });
 
@@ -334,6 +342,12 @@ class ImportReceiptService {
                     email: receipt.Account.email,
                     isActive: receipt.Account.is_active,
                 },
+                items: receipt.group_equipment.map((item) => ({
+                    code: item.group_equipment_code,
+                    name: item.group_equipment_name,
+                    price: parseInt(item.DetailImportReceipt?.price) || null,
+                    quantity: item.DetailImportReceipt?.quantity || null,
+                })),
             })),
             meta: {
                 currentPage: parseInt(page),
@@ -371,6 +385,10 @@ class ImportReceiptService {
             ],
         });
 
+        if (!importReceipt) {
+            throw new BadRequestError('Import receipt not found');
+        }
+
         if (importReceipt.approve_by) {
             const approver = await database.Account.findOne({
                 where: { user_code: importReceipt.approve_by },
@@ -384,9 +402,27 @@ class ImportReceiptService {
             };
         }
 
-        if (!importReceipt) {
-            throw new BadRequestError('Import receipt not found');
-        }
+        // Lấy danh sách Equipment riêng lẻ theo importReceiptId
+        const equipments = await database.Equipment.findAll({
+            where: { import_receipt_id: parseInt(importReceiptId) },
+            include: [
+                {
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
+                    attributes: [
+                        'group_equipment_code',
+                        'group_equipment_name',
+                    ],
+                },
+                {
+                    model: database.Room,
+                    as: 'room',
+                    attributes: ['room_name'],
+                },
+            ],
+        });
+
+        console.log('Equipments:', equipments);
 
         return {
             code: 200,
@@ -418,6 +454,23 @@ class ImportReceiptService {
                     price: item.DetailImportReceipt.price,
                     quantity: item.DetailImportReceipt.quantity,
                 })),
+                equipments:
+                    equipments.length > 0
+                        ? equipments.map((eq) => ({
+                              serialNumber: eq.serial_number,
+                              name: eq.equipment_name,
+                              description: eq.equipment_description,
+                              status: eq.status,
+                              importDate: eq.import_date,
+                              groupCode:
+                                  eq.group_equipment?.group_equipment_code ||
+                                  null,
+                              groupName:
+                                  eq.group_equipment?.group_equipment_name ||
+                                  null,
+                              roomName: eq.room?.room_name || null,
+                          }))
+                        : [],
             },
         };
     }

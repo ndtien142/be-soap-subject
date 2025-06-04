@@ -1,5 +1,6 @@
 'use strict';
 
+const e = require('express');
 const { BadRequestError } = require('../../core/error.response');
 const database = require('../../models');
 
@@ -227,6 +228,7 @@ class GroupEquipmentService {
             await database.GroupEquipment.findAndCountAll({
                 where: { is_deleted: false },
                 limit: parseInt(limit),
+                distinct: true,
                 offset,
                 include: [
                     {
@@ -244,6 +246,12 @@ class GroupEquipmentService {
                         as: 'equipment_manufacturer',
                         attributes: ['manufacturer_name', 'id'],
                     },
+                    {
+                        model: database.Equipment,
+                        as: 'equipments',
+                        attributes: ['status'],
+                        separate: true,
+                    },
                 ],
             });
         if (!groupEquipmentList) {
@@ -252,28 +260,40 @@ class GroupEquipmentService {
         return {
             code: 200,
             message: 'Get all group equipment successfully',
-            metadata: groupEquipmentList.rows.map((groupEquipment) => ({
-                code: groupEquipment.group_equipment_code,
-                name: groupEquipment.group_equipment_name,
-                description: groupEquipment.group_equipment_description,
-                unitOfMeasure: {
-                    id: groupEquipment.unit_of_measure.id,
-                    name: groupEquipment.unit_of_measure.unit_of_measure_name,
-                },
-                type: {
-                    id: groupEquipment.equipment_type.id,
-                    name: groupEquipment.equipment_type.equipment_type_name,
-                },
-                manufacturer: {
-                    id: groupEquipment.equipment_manufacturer.id,
-                    name: groupEquipment.equipment_manufacturer
-                        .manufacturer_name,
-                },
-                isDeleted: groupEquipment.is_deleted,
-                isActive: groupEquipment.is_active,
-                createdAt: groupEquipment.createdAt,
-                updatedAt: groupEquipment.updatedAt,
-            })),
+            metadata: groupEquipmentList.rows.map((groupEquipment) => {
+                const statusCounts = groupEquipment.equipments.reduce(
+                    (acc, equipment) => {
+                        acc[equipment.status] =
+                            (acc[equipment.status] || 0) + 1;
+                        return acc;
+                    },
+                    {},
+                );
+                return {
+                    code: groupEquipment.group_equipment_code,
+                    name: groupEquipment.group_equipment_name,
+                    description: groupEquipment.group_equipment_description,
+                    unitOfMeasure: {
+                        id: groupEquipment.unit_of_measure.id,
+                        name: groupEquipment.unit_of_measure
+                            .unit_of_measure_name,
+                    },
+                    type: {
+                        id: groupEquipment.equipment_type.id,
+                        name: groupEquipment.equipment_type.equipment_type_name,
+                    },
+                    manufacturer: {
+                        id: groupEquipment.equipment_manufacturer.id,
+                        name: groupEquipment.equipment_manufacturer
+                            .manufacturer_name,
+                    },
+                    equipmentStatusCounts: statusCounts,
+                    isDeleted: groupEquipment.is_deleted,
+                    isActive: groupEquipment.is_active,
+                    createdAt: groupEquipment.createdAt,
+                    updatedAt: groupEquipment.updatedAt,
+                };
+            }),
             meta: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),
@@ -303,6 +323,10 @@ class GroupEquipmentService {
                     as: 'equipment_manufacturer',
                     attributes: ['manufacturer_name', 'id'],
                 },
+                {
+                    model: database.Equipment,
+                    as: 'equipments',
+                },
             ],
         });
         if (!groupEquipment) {
@@ -328,6 +352,13 @@ class GroupEquipmentService {
                     name: groupEquipment.equipment_manufacturer
                         .manufacturer_name,
                 },
+                equipments: groupEquipment.equipments.map((equipment) => ({
+                    serialNumber: equipment.serial_number,
+                    description: equipment.equipment_description,
+                    location: equipment.equipment_location,
+                    status: equipment.status,
+                    dayOfFirstUse: equipment.day_of_first_use,
+                })),
                 isDeleted: groupEquipment.is_deleted,
                 isActive: groupEquipment.is_active,
                 createdAt: groupEquipment.createdAt,

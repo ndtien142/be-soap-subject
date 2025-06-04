@@ -27,7 +27,7 @@ function model(sequelize) {
             allowNull: false,
         },
         serial_number: {
-            type: DataTypes.STRING(20),
+            type: DataTypes.STRING(100),
             allowNull: false,
         },
         image_url: {
