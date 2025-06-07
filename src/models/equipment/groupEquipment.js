@@ -15,6 +15,10 @@ function model(sequelize) {
             type: DataTypes.STRING(1000),
             allowNull: false,
         },
+        group_equipment_description: {
+            type: DataTypes.STRING(1000),
+            allowNull: true,
+        },
         equipment_type_id: {
             type: DataTypes.TINYINT,
             allowNull: false,

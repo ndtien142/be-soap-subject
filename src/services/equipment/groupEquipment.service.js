@@ -3,6 +3,7 @@
 const e = require('express');
 const { BadRequestError } = require('../../core/error.response');
 const database = require('../../models');
+const slugify = require('slugify');
 
 class GroupEquipmentService {
     static createNewGroupEquipment = async ({
@@ -34,6 +35,7 @@ class GroupEquipmentService {
             GroupEquipmentService.generateGroupEquipmentCode(
                 equipmentTypeData.prefix,
                 manufacturerData.prefix,
+                name,
             );
 
         const unitOfMeasureData = await database.UnitOfMeasure.findOne({
@@ -91,10 +93,19 @@ class GroupEquipmentService {
         };
     };
 
-    static generateGroupEquipmentCode = (typePrefix, manufacturerPrefix) => {
-        // Use both type and manufacturer prefix, and only the current year as timestamp
-        const year = new Date().getFullYear();
-        return `${typePrefix}-${manufacturerPrefix}-${year}`;
+    static generateGroupEquipmentCode = (
+        typePrefix,
+        manufacturerPrefix,
+        name,
+    ) => {
+        // Convert name to slug
+        const slug = slugify(name, {
+            lower: true, // chữ thường
+            strict: true, // loại bỏ ký tự đặc biệt
+            locale: 'vi', // hỗ trợ tiếng Việt tốt hơn
+        });
+
+        return `${typePrefix}-${manufacturerPrefix}-${slug}`;
     };
 
     static updateGroupEquipment = async ({
