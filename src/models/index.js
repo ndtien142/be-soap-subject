@@ -29,6 +29,7 @@ const Role = require('./user/role')(sequelize);
 const KeyToken = require('./user/keyToken')(sequelize);
 const RefreshTokenUsed = require('./user/refreshTokenUsed')(sequelize);
 const Permission = require('./user/permission')(sequelize);
+const Profile = require('./user/profile')(sequelize);
 
 //  Import Equipment models
 const Equipment = require('./equipment/equipment')(sequelize);
@@ -81,6 +82,7 @@ database.Role = Role;
 database.KeyToken = KeyToken;
 database.RefreshTokenUsed = RefreshTokenUsed;
 database.Permission = Permission;
+database.Profile = Profile;
 
 // Equipment
 database.Equipment = Equipment;
@@ -140,6 +142,11 @@ database.Role.belongsToMany(database.Permission, {
     through: 'tb_role_permission',
     foreignKey: 'role_id',
     as: 'permissions',
+});
+
+database.Profile.belongsTo(database.Account, {
+    foreignKey: 'user_code',
+    as: 'account',
 });
 
 // Equipment associations
