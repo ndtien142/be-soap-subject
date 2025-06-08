@@ -21,5 +21,6 @@ router.use('/v1/api/transfer-receipt', require('./transfer-receipt'));
 router.use('/v1/api/liquidation-receipt', require('./liquidation-receipt'));
 router.use('/v1/api/department', require('./department'));
 router.use('/v1/api/room', require('./room'));
+router.use('/v1/api/user', require('./user'));
 
 module.exports = router;
