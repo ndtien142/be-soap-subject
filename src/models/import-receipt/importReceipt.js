@@ -12,6 +12,10 @@ function model(sequelize) {
             autoIncrement: true,
             allowNull: false,
         },
+        name: {
+            type: DataTypes.STRING(1000),
+            allowNull: true,
+        },
         date_of_order: {
             type: DataTypes.DATE,
             allowNull: false,

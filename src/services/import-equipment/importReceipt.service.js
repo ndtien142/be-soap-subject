@@ -5,6 +5,7 @@ const database = require('../../models');
 class ImportReceiptService {
     static async createImportReceipt({
         supplier,
+        name,
         items,
         dateOfReceived,
         dateOfOrder,
@@ -53,6 +54,7 @@ class ImportReceiptService {
         // Create import receipt
         const importReceipt = await database.ImportReceipt.create(
             {
+                name: name || `Import Receipt - ${new Date().toISOString()}`,
                 supplier_id: supplierData.id,
                 date_of_order: dateOfOrder,
                 date_of_received: dateOfReceived,
@@ -281,10 +283,37 @@ class ImportReceiptService {
         };
     }
 
-    static async getAllImportReceipts({ page = 1, limit = 20 }) {
+    static async getAllImportReceipts({
+        page = 1,
+        limit = 20,
+        searchText,
+        status,
+        orderDate,
+    }) {
         const offset = (parseInt(page) - 1) * parseInt(limit);
 
+        // Build where clause for ImportReceipt
+        const where = {};
+        if (status) {
+            where.status = status;
+        }
+        if (orderDate) {
+            where.date_of_order = orderDate;
+        }
+
+        // Build where clause for Supplier (for searchText)
+        let supplierWhere = undefined;
+        if (searchText) {
+            // Sequelize Op
+            const { Op } = require('sequelize');
+            where[Op.or] = [{ name: { [Op.iLike]: `%${searchText}%` } }];
+            supplierWhere = {
+                supplier_name: { [Op.iLike]: `%${searchText}%` },
+            };
+        }
+
         const importReceipts = await database.ImportReceipt.findAndCountAll({
+            where,
             limit: parseInt(limit),
             offset,
             include: [
@@ -298,6 +327,7 @@ class ImportReceiptService {
                         'supplier_phone',
                         'supplier_email',
                     ],
+                    ...(supplierWhere && { where: supplierWhere }),
                 },
                 {
                     model: database.Account,
@@ -315,15 +345,33 @@ class ImportReceiptService {
             ],
         });
 
-        if (!importReceipts.rows.length) {
+        // Filter by supplier name if searchText is provided and not matched in ImportReceipt.name
+        let filteredRows = importReceipts.rows;
+        if (searchText) {
+            filteredRows = filteredRows.filter(
+                (receipt) =>
+                    (receipt.name &&
+                        receipt.name
+                            .toLowerCase()
+                            .includes(searchText.toLowerCase())) ||
+                    (receipt.Supplier &&
+                        receipt.Supplier.supplier_name &&
+                        receipt.Supplier.supplier_name
+                            .toLowerCase()
+                            .includes(searchText.toLowerCase())),
+            );
+        }
+
+        if (!filteredRows.length) {
             throw new BadRequestError('No import receipts found');
         }
 
         return {
             code: 200,
             message: 'Get all import receipts successfully',
-            metadata: importReceipts.rows.map((receipt) => ({
+            metadata: filteredRows.map((receipt) => ({
                 id: receipt.id,
+                name: receipt.name,
                 dateOfOrder: receipt.date_of_order,
                 dateOfReceived: receipt.date_of_received,
                 dateOfActualReceived: receipt.date_of_actual_received,
@@ -352,8 +400,8 @@ class ImportReceiptService {
             meta: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),
-                totalItems: importReceipts.count,
-                totalPages: Math.ceil(importReceipts.count / limit),
+                totalItems: filteredRows.length,
+                totalPages: Math.ceil(filteredRows.length / limit),
             },
         };
     }
@@ -429,6 +477,7 @@ class ImportReceiptService {
             message: 'Get import receipt details successfully',
             metadata: {
                 id: importReceipt.id,
+                name: importReceipt.name,
                 dateOfOrder: importReceipt.date_of_order,
                 dateOfReceived: importReceipt.date_of_received,
                 dateOfActualReceived: importReceipt.date_of_actual_received,

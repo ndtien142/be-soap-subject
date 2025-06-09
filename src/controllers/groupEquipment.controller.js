@@ -21,11 +21,19 @@ class GroupEquipmentController {
         }).send(res);
     };
     getAllGroupEquipment = async (req, res, next) => {
+        const page = req.query.page;
+        const limit = req.query.limit;
+        const searchText =
+            typeof req.query.searchText === 'undefined'
+                ? undefined
+                : req.query.searchText;
         new SuccessResponse({
             message: 'Get all equipment successfully',
-            metadata: await GroupEquipmentService.getAllGroupEquipment(
-                req.query,
-            ),
+            metadata: await GroupEquipmentService.getAllGroupEquipment({
+                page,
+                limit,
+                searchText,
+            }),
         }).send(res);
     };
     getGroupEquipmentByCode = async (req, res, next) => {

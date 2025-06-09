@@ -4,6 +4,7 @@ const e = require('express');
 const { BadRequestError } = require('../../core/error.response');
 const database = require('../../models');
 const slugify = require('slugify');
+const { Op } = require('sequelize');
 
 class GroupEquipmentService {
     static createNewGroupEquipment = async ({
@@ -233,13 +234,26 @@ class GroupEquipmentService {
         };
     };
 
-    static getAllGroupEquipment = async ({ page = 1, limit = 20 }) => {
+    static getAllGroupEquipment = async ({
+        page = 1,
+        limit = 20,
+        searchText,
+    }) => {
         const offset = (parseInt(page) - 1) * parseInt(limit);
+
+        // Build where clause
+        const where = { is_deleted: false };
+        if (searchText) {
+            where[Op.or] = [
+                { group_equipment_name: { [Op.like]: `%${searchText}%` } },
+                { group_equipment_code: { [Op.like]: `%${searchText}%` } },
+            ];
+        }
+
         const groupEquipmentList =
             await database.GroupEquipment.findAndCountAll({
-                where: { is_deleted: false },
+                where,
                 limit: parseInt(limit),
-                distinct: true,
                 offset,
                 include: [
                     {
