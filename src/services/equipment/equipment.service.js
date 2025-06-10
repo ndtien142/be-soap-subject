@@ -105,9 +105,18 @@ class EquipmentService {
                 {
                     model: database.Room,
                     as: 'room',
+                    include: [
+                        {
+                            model: database.Department,
+                            as: 'department',
+                        },
+                    ],
                 },
             ],
         });
+        console.log(equipment);
+        console.log('Equipment room:', equipment.room.department);
+
         if (!equipment) {
             throw new BadRequestError('Equipment not found');
         }
@@ -135,8 +144,14 @@ class EquipmentService {
                     : null,
                 room: equipment.room
                     ? {
-                          id: equipment.room.id,
-                          name: equipment.room.name,
+                          id: equipment.room.room_id,
+                          name: equipment.room.room_name,
+                          note: equipment.room.notes,
+                          status: equipment.room.status,
+                          department: {
+                              id: equipment.room.department.department_id,
+                              name: equipment.room.department.department_name,
+                          },
                       }
                     : null,
             },
@@ -195,8 +210,15 @@ class EquipmentService {
                         : null,
                     room: equipment.room
                         ? {
-                              id: equipment.room.id,
-                              name: equipment.room.name,
+                              id: equipment.room.room_id,
+                              name: equipment.room.room_name,
+                              note: equipment.room.notes,
+                              status: equipment.room.status,
+                              department: {
+                                  id: equipment.room.department.department_id,
+                                  name: equipment.room.department
+                                      .department_name,
+                              },
                           }
                         : null,
                 };

@@ -351,6 +351,18 @@ class GroupEquipmentService {
                 {
                     model: database.Equipment,
                     as: 'equipments',
+                    include: [
+                        {
+                            model: database.Room,
+                            as: 'room',
+                            include: [
+                                {
+                                    model: database.Department,
+                                    as: 'department',
+                                },
+                            ],
+                        },
+                    ],
                 },
             ],
         });
@@ -383,6 +395,16 @@ class GroupEquipmentService {
                     location: equipment.equipment_location,
                     status: equipment.status,
                     dayOfFirstUse: equipment.day_of_first_use,
+                    room: {
+                        id: equipment.room?.room_id,
+                        name: equipment.room?.room_name,
+                        note: equipment.room?.notes,
+                        status: equipment.room?.status,
+                        department: {
+                            id: equipment.room?.department?.department_id,
+                            name: equipment.room?.department?.department_name,
+                        },
+                    },
                 })),
                 isDeleted: groupEquipment.is_deleted,
                 isActive: groupEquipment.is_active,
