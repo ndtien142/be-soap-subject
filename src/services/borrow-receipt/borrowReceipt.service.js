@@ -7,6 +7,7 @@ const { Op } = require('sequelize');
 class BorrowReceiptService {
     static async createBorrowReceipt({
         user,
+        borrowDate,
         returnDate,
         note,
         roomId,
@@ -36,9 +37,14 @@ class BorrowReceiptService {
                 status: 'requested',
                 note,
                 room_id: roomId,
+                borrow_date: borrowDate || null,
             },
             { transaction },
         );
+
+        if (!Array.isArray(groups) || groups.length === 0) {
+            throw new BadRequestError('Groups must be a non-empty array');
+        }
 
         // Create BorrowRequestItem for each group
         for (const group of groups) {
@@ -432,7 +438,7 @@ class BorrowReceiptService {
         return {
             code: 200,
             message: 'Get borrow receipt details successfully',
-            data: {
+            metadata: {
                 id: borrowReceipt.id,
                 userCode: borrowReceipt.user_code,
                 returnDate: borrowReceipt.return_date,
@@ -485,10 +491,13 @@ class BorrowReceiptService {
 
     static async checkEquipmentAvailable({ groups }) {
         // groups: [{ groupEquipmentCode, quantity }]
+        console.log(groups);
         if (!Array.isArray(groups) || groups.length === 0) {
             throw new BadRequestError('groups is required');
         }
         const results = [];
+        let allAvailable = true; // Variable to check if all groups are available
+
         for (const group of groups) {
             const { groupEquipmentCode, quantity } = group;
             if (!groupEquipmentCode || !quantity || quantity <= 0) {
@@ -502,16 +511,20 @@ class BorrowReceiptService {
                     status: 'available',
                 },
             });
+            const isAvailable = availableCount >= quantity;
+            if (!isAvailable) allAvailable = false;
+
             results.push({
                 groupEquipmentCode,
                 requested: quantity,
-                available: availableCount >= quantity,
+                available: isAvailable,
                 availableCount,
             });
         }
         return {
             code: 200,
             results,
+            allAvailable, // true if all groups are available
         };
     }
 
@@ -524,108 +537,143 @@ class BorrowReceiptService {
     static async scanAndExportEquipment({ borrowReceiptId, serialNumber }) {
         const transaction = await database.sequelize.transaction();
 
-        // Find receipt and check status
-        const borrowReceipt = await database.BorrowReceipt.findByPk(
-            borrowReceiptId,
-            { transaction },
-        );
-        if (!borrowReceipt)
-            throw new BadRequestError('Borrow receipt not found');
-        if (
-            borrowReceipt.status !== 'approved' &&
-            borrowReceipt.status !== 'partial_borrowed' &&
-            borrowReceipt.status !== 'processing'
-        ) {
-            throw new BadRequestError(
-                'Receipt must be approved or partial_borrowed to export equipment',
+        try {
+            // 1️⃣ Tìm phiếu và kiểm tra trạng thái
+            const borrowReceipt = await database.BorrowReceipt.findByPk(
+                borrowReceiptId,
+                { transaction },
             );
-        }
-
-        // Find equipment and check status
-        const equipment = await database.Equipment.findOne({
-            where: { serial_number: serialNumber },
-            transaction,
-        });
-        if (!equipment) throw new BadRequestError('Equipment not found');
-        if (equipment.status !== 'available') {
-            throw new BadRequestError(
-                'Equipment is not available for borrowing',
-            );
-        }
-
-        // Create BorrowReceiptDetail
-        await database.BorrowReceiptDetail.create(
-            {
-                borrow_receipt_id: parseInt(borrowReceiptId),
-                serial_number: serialNumber,
-            },
-            { transaction },
-        );
-
-        // Update equipment status
-        await database.Equipment.update(
-            { status: 'reserved', room_id: borrowReceipt.room_id },
-            { where: { serial_number: serialNumber }, transaction },
-        );
-
-        // Get total requested
-        const totalRequested = await database.BorrowRequestItem.sum(
-            'quantity',
-            {
-                where: { borrow_id: borrowReceiptId },
-                transaction,
-            },
-        );
-
-        // Count how many devices have been exported for this receipt
-        const totalExported = await database.BorrowReceiptDetail.count({
-            where: { borrow_receipt_id: borrowReceiptId },
-            transaction,
-        });
-
-        // Update receipt status if needed
-        let newStatus = borrowReceipt.status;
-        if (totalExported < totalRequested) {
-            newStatus = 'processing';
-        } else if (totalExported === totalRequested) {
-            newStatus = 'borrowed';
-            // Update all equipment in this receipt to in_use
-            const allSerials = await database.BorrowReceiptDetail.findAll({
-                attributes: ['serial_number'],
-                where: { borrow_receipt_id: borrowReceiptId },
-                transaction,
-            });
-            const serialNumbers = allSerials.map((item) => item.serial_number);
-            if (serialNumbers.length > 0) {
-                await database.Equipment.update(
-                    { status: 'in_use' },
-                    { where: { serial_number: serialNumbers }, transaction },
-                );
-                // Update day_of_first_use if null
-                await database.Equipment.update(
-                    { day_of_first_use: new Date() },
-                    {
-                        where: {
-                            serial_number: serialNumbers,
-                            day_of_first_use: null,
-                        },
-                        transaction,
-                    },
+            if (!borrowReceipt)
+                throw new BadRequestError('Borrow receipt not found');
+            if (
+                borrowReceipt.status !== 'approved' &&
+                borrowReceipt.status !== 'partial_borrowed' &&
+                borrowReceipt.status !== 'processing'
+            ) {
+                throw new BadRequestError(
+                    'Receipt must be approved or partial_borrowed to export equipment',
                 );
             }
+
+            // 2️⃣ Tìm thiết bị và kiểm tra
+            const equipment = await database.Equipment.findOne({
+                where: { serial_number: serialNumber },
+                transaction,
+            });
+            if (!equipment) throw new BadRequestError('Equipment not found');
+            if (equipment.status !== 'available') {
+                throw new BadRequestError(
+                    'Equipment is not available for borrowing',
+                );
+            }
+
+            // 3️⃣ Tạo BorrowReceiptDetail
+            await database.BorrowReceiptDetail.create(
+                {
+                    borrow_receipt_id: parseInt(borrowReceiptId),
+                    serial_number: serialNumber,
+                },
+                { transaction },
+            );
+
+            // 4️⃣ Cập nhật thiết bị sang reserved
+            await database.Equipment.update(
+                { status: 'reserved', room_id: borrowReceipt.room_id },
+                { where: { serial_number: serialNumber }, transaction },
+            );
+
+            // 5️⃣ Lấy danh sách request items (group + quantity)
+            const requestItems = await database.BorrowRequestItem.findAll({
+                where: { borrow_id: borrowReceiptId },
+                attributes: ['equipment_code', 'quantity'],
+                transaction,
+            });
+
+            // 6️⃣ Đếm số lượng serial_number đã scan theo group
+            const scannedCounts = await database.BorrowReceipt.findAll({
+                where: { id: borrowReceiptId },
+                include: [
+                    {
+                        model: database.Equipment,
+                        attributes: ['group_equipment_code'],
+                        as: 'equipment',
+                    },
+                ],
+                transaction,
+            });
+
+            console.log('scanner count: ', scannedCounts.equipment);
+
+            // Tạo map đếm group_equipment_code
+            const scannedMap = {};
+            scannedCounts.forEach((item) => {
+                item.equipment.forEach((eq) => {
+                    scannedMap[eq.group_equipment_code] =
+                        (scannedMap[eq.group_equipment_code] || 0) + 1;
+                });
+            });
+
+            // 7️⃣ Kiểm tra từng requestItem để quyết định status
+            let allGroupsDone = true;
+            for (const req of requestItems) {
+                const scannedQty = scannedMap[req.equipment_code] || 0;
+                if (scannedQty < req.quantity) {
+                    allGroupsDone = false;
+                    break;
+                }
+
+                if (scannedQty > req.quantity) {
+                    throw new BadRequestError(
+                        `Scanned quantity for group ${req.equipment_code} exceeds requested quantity`,
+                    );
+                }
+            }
+
+            // 8️⃣ Cập nhật status phiếu
+            let newStatus = borrowReceipt.status;
+            if (allGroupsDone) {
+                newStatus = 'borrowed';
+                // Update tất cả thiết bị sang in_use + day_of_first_use
+                const serialNumbers = scannedCounts.map((s) => s.serial_number);
+                if (serialNumbers.length > 0) {
+                    await database.Equipment.update(
+                        {
+                            status: 'in_use',
+                            day_of_first_use: database.sequelize.literal(
+                                'CASE WHEN day_of_first_use IS NULL THEN NOW() ELSE day_of_first_use END',
+                            ),
+                        },
+                        {
+                            where: { serial_number: serialNumbers },
+                            transaction,
+                        },
+                    );
+                }
+            } else {
+                newStatus = 'processing';
+            }
+
+            borrowReceipt.status = newStatus;
+            await borrowReceipt.save({ transaction });
+
+            await transaction.commit();
+
+            return {
+                borrowReceiptId,
+                serialNumber,
+                status: newStatus,
+                // Thêm báo cáo số lượng cho rõ ràng
+                scannedCounts: scannedMap,
+                requestItems: requestItems.map((r) => ({
+                    equipment_code: r.equipment_code,
+                    requested: r.quantity,
+                    scanned: scannedMap[r.equipment_code] || 0,
+                })),
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
-        borrowReceipt.status = newStatus;
-        await borrowReceipt.save({ transaction });
-
-        await transaction.commit();
-
-        return {
-            borrowReceiptId,
-            serialNumber,
-            status: newStatus,
-            actualQuantity: totalExported,
-            totalRequested,
-        };
     }
 
     /**
@@ -637,57 +685,203 @@ class BorrowReceiptService {
     static async deleteScannedEquipment({ borrowReceiptId, serialNumber }) {
         const transaction = await database.sequelize.transaction();
 
-        // Check borrow receipt status
-        const borrowReceipt = await database.BorrowReceipt.findByPk(
-            borrowReceiptId,
-            { transaction },
-        );
-        if (!borrowReceipt) {
-            throw new BadRequestError('Borrow receipt not found');
-        }
-        if (borrowReceipt.status !== 'processing') {
-            throw new BadRequestError(
-                'Can only remove equipment when receipt is in processing status',
+        try {
+            // 1️⃣ Kiểm tra phiếu
+            const borrowReceipt = await database.BorrowReceipt.findByPk(
+                borrowReceiptId,
+                { transaction },
             );
-        }
+            if (!borrowReceipt)
+                throw new BadRequestError('Borrow receipt not found');
+            if (
+                borrowReceipt.status !== 'processing' &&
+                borrowReceipt.status !== 'borrowed'
+            ) {
+                throw new BadRequestError(
+                    'Can only remove equipment when receipt is in processing or borrowed status',
+                );
+            }
 
-        // Check if the detail exists
-        const detail = await database.BorrowReceiptDetail.findOne({
-            where: {
-                borrow_receipt_id: borrowReceiptId,
-                serial_number: serialNumber,
-            },
-            transaction,
-        });
-        if (!detail) {
-            throw new BadRequestError(
-                'Scanned equipment not found in this receipt',
+            // 2️⃣ Kiểm tra chi tiết
+            const detail = await database.BorrowReceiptDetail.findOne({
+                where: {
+                    borrow_receipt_id: borrowReceiptId,
+                    serial_number: serialNumber,
+                },
+                transaction,
+            });
+
+            if (!detail) {
+                throw new BadRequestError(
+                    'Scanned equipment not found in this receipt',
+                );
+            }
+
+            // 3️⃣ Xóa chi tiết
+            await database.BorrowReceiptDetail.destroy({
+                where: {
+                    borrow_receipt_id: borrowReceiptId,
+                    serial_number: serialNumber,
+                },
+                transaction,
+            });
+
+            // 4️⃣ Đổi trạng thái thiết bị lại 'available'
+            await database.Equipment.update(
+                { status: 'available', room_id: null },
+                { where: { serial_number: serialNumber }, transaction },
             );
-        }
 
-        // Delete the BorrowReceiptDetail
-        await database.BorrowReceiptDetail.destroy({
-            where: {
-                borrow_receipt_id: borrowReceiptId,
-                serial_number: serialNumber,
-            },
-            transaction,
+            // 5️⃣ Đếm lại số lượng thiết bị đã scan theo group
+            const requestItems = await database.BorrowRequestItem.findAll({
+                where: { borrow_id: borrowReceiptId },
+                attributes: ['equipment_code', 'quantity'],
+                transaction,
+            });
+
+            const scannedCounts = await database.BorrowReceipt.findAll({
+                include: [
+                    {
+                        model: database.Equipment,
+                        attributes: ['group_equipment_code'],
+                        as: 'equipment',
+                    },
+                ],
+                where: { id: borrowReceiptId },
+                transaction,
+            });
+
+            const scannedMap = {};
+            scannedCounts.forEach((item) => {
+                item.equipment.forEach((eq) => {
+                    scannedMap[eq.group_equipment_code] =
+                        (scannedMap[eq.group_equipment_code] || 0) + 1;
+                });
+            });
+
+            // 6️⃣ Xác định trạng thái mới
+            let newStatus = 'approved';
+            let hasAnyScanned = scannedCounts.length > 0;
+
+            if (hasAnyScanned) {
+                let allGroupsDone = true;
+                for (const req of requestItems) {
+                    const scannedQty = scannedMap[req.equipment_code] || 0;
+                    if (scannedQty < req.quantity) {
+                        allGroupsDone = false;
+                        break;
+                    }
+                }
+                newStatus = allGroupsDone ? 'borrowed' : 'processing';
+            }
+
+            borrowReceipt.status = newStatus;
+            await borrowReceipt.save({ transaction });
+
+            await transaction.commit();
+
+            return {
+                borrowReceiptId,
+                serialNumber,
+                newStatus,
+                message:
+                    'Scanned equipment deleted and status updated successfully',
+                scannedCounts: scannedMap,
+                requestItems: requestItems.map((r) => ({
+                    equipment_code: r.equipment_code,
+                    requested: r.quantity,
+                    scanned: scannedMap[r.equipment_code] || 0,
+                })),
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    /**
+     * Check available status for all items in a borrow receipt.
+     * @param {number} borrowReceiptId
+     * @returns {object}
+     */
+    static async getListAvailableOfBorrowReceipt(borrowReceiptId) {
+        // Get all request items for this receipt
+        const requestItems = await database.BorrowRequestItem.findAll({
+            where: { borrow_id: borrowReceiptId },
+            attributes: ['equipment_code', 'quantity'],
         });
 
-        // Set equipment status back to 'available'
-        await database.Equipment.update(
-            { status: 'available' },
-            { where: { serial_number: serialNumber }, transaction },
-        );
+        const results = [];
+        let allAvailable = true; // Track if all groups are available
 
-        // Optionally, update actual_quantity in BorrowRequestItem if needed
+        for (const item of requestItems) {
+            const groupEquipmentCode = item.equipment_code;
+            const requestedQty = item.quantity;
 
-        await transaction.commit();
+            // Get group equipment info
+            const groupEquipment = await database.GroupEquipment.findOne({
+                where: { group_equipment_code: groupEquipmentCode },
+                attributes: [
+                    'group_equipment_code',
+                    'group_equipment_name',
+                    'group_equipment_description',
+                    'equipment_type_id',
+                    'equipment_manufacturer_id',
+                ],
+                include: [
+                    {
+                        model: database.EquipmentType,
+                        as: 'equipment_type',
+                        attributes: ['id', 'equipment_type_name'],
+                    },
+                    {
+                        model: database.EquipmentManufacturer,
+                        as: 'equipment_manufacturer',
+                        attributes: ['id', 'manufacturer_name'],
+                    },
+                ],
+            });
+
+            // Count available equipment for this group
+            const availableCount = await database.Equipment.count({
+                where: {
+                    group_equipment_code: groupEquipmentCode,
+                    status: 'available',
+                },
+            });
+
+            const isAvailable = availableCount >= requestedQty;
+            if (!isAvailable) allAvailable = false;
+
+            results.push({
+                groupEquipmentCode,
+                groupEquipmentName:
+                    groupEquipment?.group_equipment_name || null,
+                groupEquipmentDescription:
+                    groupEquipment?.group_equipment_description || null,
+                equipmentType: {
+                    id: groupEquipment?.equipment_type_id || null,
+                    name:
+                        groupEquipment?.equipment_type?.equipment_type_name ||
+                        null,
+                },
+                equipmentManufacturer: {
+                    id: groupEquipment?.equipment_manufacturer_id || null,
+                    name:
+                        groupEquipment?.equipment_manufacturer
+                            ?.manufacturer_name || null,
+                },
+                requested: requestedQty,
+                available: isAvailable,
+                availableCount,
+            });
+        }
 
         return {
-            borrowReceiptId,
-            serialNumber,
-            message: 'Scanned equipment deleted successfully',
+            code: 200,
+            metadata: results,
+            allAvailable,
+            message: 'Available status checked successfully',
         };
     }
 }
