@@ -3,6 +3,8 @@ const IMPORT_RECEIPT_STATUS = Object.freeze({
     approved: 'approved',
     completed: 'completed',
     rejected: 'rejected',
+    received: 'received',
+    returned: 'returned',
 });
 
 const DETAIL_EQUIPMENT_STATUS = Object.freeze({

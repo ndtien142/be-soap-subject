@@ -130,10 +130,37 @@ class ImportReceiptService {
             throw new BadRequestError('Import receipt not found');
         }
 
-        // Validate status transition
-        if (importReceipt.status !== IMPORT_RECEIPT_STATUS.requested) {
+        // Enhanced status transition validation
+        const currentStatus = importReceipt.status;
+        if (currentStatus === IMPORT_RECEIPT_STATUS.requested) {
+            if (
+                status !== IMPORT_RECEIPT_STATUS.approved &&
+                status !== IMPORT_RECEIPT_STATUS.rejected
+            ) {
+                throw new BadRequestError(
+                    `Can only update 'requested' to 'approved' or 'rejected'`,
+                );
+            }
+        } else if (currentStatus === IMPORT_RECEIPT_STATUS.approved) {
+            if (
+                status !== IMPORT_RECEIPT_STATUS.returned &&
+                status !== IMPORT_RECEIPT_STATUS.received
+            ) {
+                throw new BadRequestError(
+                    `Can only update 'approved' to 'returned' or 'received'`,
+                );
+            }
+        } else if (currentStatus === IMPORT_RECEIPT_STATUS.rejected) {
             throw new BadRequestError(
-                `Cannot update import receipt with status: ${importReceipt.status}`,
+                `Cannot update import receipt with status: 'rejected'`,
+            );
+        } else if (currentStatus === IMPORT_RECEIPT_STATUS.received) {
+            throw new BadRequestError(
+                `Cannot update import receipt with status: 'received'`,
+            );
+        } else {
+            throw new BadRequestError(
+                `Cannot update import receipt with status: ${currentStatus}`,
             );
         }
 
@@ -141,12 +168,24 @@ class ImportReceiptService {
         if (status === IMPORT_RECEIPT_STATUS.approved) {
             importReceipt.status = IMPORT_RECEIPT_STATUS.approved;
             if (user) {
-                console.log('User:', user);
                 importReceipt.approve_by = user.userCode;
             }
         } else if (status === IMPORT_RECEIPT_STATUS.rejected) {
             importReceipt.status = IMPORT_RECEIPT_STATUS.rejected;
             importReceipt.note = reason || 'No reason provided';
+            if (user) {
+                importReceipt.approve_by = user.userCode;
+            }
+        } else if (status === IMPORT_RECEIPT_STATUS.received) {
+            importReceipt.status = IMPORT_RECEIPT_STATUS.received;
+            importReceipt.date_of_actual_received = new Date()
+                .toISOString()
+                .split('T')[0];
+            if (user) {
+                importReceipt.approve_by = user.userCode;
+            }
+        } else if (status === IMPORT_RECEIPT_STATUS.returned) {
+            importReceipt.status = IMPORT_RECEIPT_STATUS.returned;
             if (user) {
                 importReceipt.approve_by = user.userCode;
             }
