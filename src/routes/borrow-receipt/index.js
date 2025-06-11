@@ -346,6 +346,55 @@ const router = express.Router();
  *                   type: string
  */
 
+/**
+ * @swagger
+ * /borrow-receipt/{id}/list-available:
+ *   get:
+ *     summary: Get list available of borrow receipt
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     tags: [BorrowReceipt]
+ *     responses:
+ *       200:
+ *         description: List available of borrow receipt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       groupEquipmentCode:
+ *                         type: string
+ *                       groupEquipmentName:
+ *                         type: string
+ *                       groupEquipmentDescription:
+ *                         type: string
+ *                       equipmentTypeId:
+ *                         type: integer
+ *                       equipmentManufacturerId:
+ *                         type: integer
+ *                       requested:
+ *                         type: integer
+ *                       available:
+ *                         type: boolean
+ *                       availableCount:
+ *                         type: integer
+ */
+
 router.use(authenticationV2);
 
 router.post('', asyncHandler(borrowReceiptController.createBorrowReceipt));
@@ -366,6 +415,10 @@ router.get('', asyncHandler(borrowReceiptController.getAllBorrowReceipts));
 router.get(
     '/:id',
     asyncHandler(borrowReceiptController.getBorrowReceiptDetails),
+);
+router.get(
+    '/:id/list-available',
+    asyncHandler(borrowReceiptController.getListAvailable),
 );
 
 module.exports = router;
