@@ -72,7 +72,7 @@ class BorrowReceiptController {
         new SuccessResponse({
             message: 'Check equipment available',
             metadata: await BorrowReceiptService.checkEquipmentAvailable(
-                req.query,
+                req.body,
             ),
         }).send(res);
     };
@@ -100,6 +100,16 @@ class BorrowReceiptController {
                 borrowReceiptId,
                 serialNumber,
             }),
+        }).send(res);
+    };
+
+    getListAvailable = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get list available of borrow receipt',
+            metadata:
+                await BorrowReceiptService.getListAvailableOfBorrowReceipt(
+                    req.params.id,
+                ),
         }).send(res);
     };
 }
