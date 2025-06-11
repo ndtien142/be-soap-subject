@@ -62,6 +62,17 @@ app.use('/v1/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // init routes
 app.use('/', require('./routes'));
 
+app.use((err, req, res, next) => {
+    // Handle errors globally
+    const statusCode = err.status || 500;
+    res.status(statusCode).json({
+        message: err.message || 'Internal Server Error',
+        code: statusCode || 500,
+        status: 'error',
+        stack: err.stack,
+    });
+});
+
 // handling error
 
 module.exports = app;
