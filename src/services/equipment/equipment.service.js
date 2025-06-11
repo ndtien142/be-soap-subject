@@ -100,6 +100,14 @@ class EquipmentService {
                         {
                             model: database.Account,
                         },
+                        {
+                            model: database.Supplier,
+                            as: 'supplier',
+                        },
+                        {
+                            model: database.GroupEquipment,
+                            as: 'group_equipment',
+                        },
                     ],
                 },
                 {
@@ -114,12 +122,50 @@ class EquipmentService {
                 },
             ],
         });
-        console.log(equipment);
-        console.log('Equipment room:', equipment.room.department);
+        if (equipment.import_receipt.approve_by) {
+            const approver = await database.Account.findOne({
+                where: { user_code: equipment.import_receipt.approve_by },
+            });
+            equipment.import_receipt.approved_by = {
+                userCode: approver.user_code,
+                name: approver.full_name,
+                username: approver.username,
+                email: approver.email,
+                phone: approver.phone_number,
+            };
+        }
+
+        if (equipment.import_receipt.user_code) {
+            const user = await database.Account.findOne({
+                where: { user_code: equipment.import_receipt.user_code },
+            });
+            equipment.import_receipt.user_requested = {
+                userCode: user.user_code,
+                name: user.full_name,
+                username: user.username,
+                email: user.email,
+                phone: user.phone_number,
+            };
+        }
 
         if (!equipment) {
             throw new BadRequestError('Equipment not found');
         }
+
+        // Get price from DetailImportReceipt if available
+        let price = null;
+        if (
+            equipment.import_receipt &&
+            equipment.import_receipt.group_equipment?.length > 0
+        ) {
+            price = equipment.import_receipt.group_equipment?.find((item) => {
+                return (
+                    item.group_equipment_code ===
+                    equipment.group_equipment.group_equipment_code
+                );
+            })?.DetailImportReceipt?.price;
+        }
+
         return {
             code: 200,
             message: 'Get equipment by serial number successfully',
@@ -131,10 +177,28 @@ class EquipmentService {
                 status: equipment.status,
                 importReceipt: {
                     id: equipment.import_receipt_id,
-                    userCode: equipment.import_receipt?.user_code,
+                    price,
+                    userRequested: equipment.import_receipt?.user_requested,
                     approvedBy: equipment.import_receipt.approved_by,
                     receivedAt: equipment.import_receipt.date_of_received,
                     note: equipment.import_receipt.note,
+                    supplier: equipment.import_receipt.supplier
+                        ? {
+                              id: equipment.import_receipt.supplier.supplier_id,
+                              name: equipment.import_receipt.supplier
+                                  .supplier_name,
+                              address:
+                                  equipment.import_receipt.supplier
+                                      .supplier_address,
+                              description:
+                                  equipment.import_receipt.supplier
+                                      .supplier_description,
+                              phone: equipment.import_receipt.supplier
+                                  .supplier_phone,
+                              email: equipment.import_receipt.supplier
+                                  .supplier_email,
+                          }
+                        : null,
                 },
                 groupEquipment: equipment.group_equipment
                     ? {
@@ -174,6 +238,7 @@ class EquipmentService {
                     include: [
                         {
                             model: database.Account,
+                            as: 'account',
                         },
                     ],
                 },
@@ -214,11 +279,14 @@ class EquipmentService {
                               name: equipment.room.room_name,
                               note: equipment.room.notes,
                               status: equipment.room.status,
-                              department: {
-                                  id: equipment.room.department.department_id,
-                                  name: equipment.room.department
-                                      .department_name,
-                              },
+                              department: equipment.room.department
+                                  ? {
+                                        id: equipment.room.department
+                                            .department_id,
+                                        name: equipment.room.department
+                                            .department_name,
+                                    }
+                                  : undefined,
                           }
                         : null,
                 };
