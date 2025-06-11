@@ -175,7 +175,7 @@ class ImportReceiptService {
             include: [
                 {
                     model: database.Supplier,
-                    as: 'Supplier',
+                    as: 'supplier',
                     attributes: [
                         'id',
                         'supplier_name',
@@ -255,11 +255,11 @@ class ImportReceiptService {
                 status: importReceipt.status,
                 note: importReceipt.note,
                 supplier: {
-                    id: importReceipt.Supplier.id,
-                    name: importReceipt.Supplier.supplier_name,
-                    address: importReceipt.Supplier.supplier_address,
-                    phone: importReceipt.Supplier.supplier_phone,
-                    email: importReceipt.Supplier.supplier_email,
+                    id: importReceipt.supplier.id,
+                    name: importReceipt.supplier.supplier_name,
+                    address: importReceipt.supplier.supplier_address,
+                    phone: importReceipt.supplier.supplier_phone,
+                    email: importReceipt.supplier.supplier_email,
                 },
                 user: {
                     code: importReceipt.Account.user_code,
@@ -316,31 +316,21 @@ class ImportReceiptService {
             where,
             limit: parseInt(limit),
             offset,
+            distinct: true,
             include: [
                 {
                     model: database.Supplier,
-                    as: 'Supplier',
-                    attributes: [
-                        'id',
-                        'supplier_name',
-                        'supplier_address',
-                        'supplier_phone',
-                        'supplier_email',
-                    ],
-                    ...(supplierWhere && { where: supplierWhere }),
+                    as: 'supplier',
+
+                    // ...(supplierWhere && { where: supplierWhere }),
                 },
                 {
                     model: database.Account,
                     as: 'Account',
-                    attributes: ['user_code', 'username', 'email', 'is_active'],
                 },
                 {
                     model: database.GroupEquipment,
                     as: 'group_equipment',
-                    attributes: [
-                        'group_equipment_code',
-                        'group_equipment_name',
-                    ],
                 },
             ],
         });
@@ -354,9 +344,9 @@ class ImportReceiptService {
                         receipt.name
                             .toLowerCase()
                             .includes(searchText.toLowerCase())) ||
-                    (receipt.Supplier &&
-                        receipt.Supplier.supplier_name &&
-                        receipt.Supplier.supplier_name
+                    (receipt.supplier &&
+                        receipt.supplier.supplier_name &&
+                        receipt.supplier.supplier_name
                             .toLowerCase()
                             .includes(searchText.toLowerCase())),
             );
@@ -378,11 +368,11 @@ class ImportReceiptService {
                 status: receipt.status,
                 note: receipt.note,
                 supplier: {
-                    id: receipt.Supplier.id,
-                    name: receipt.Supplier.supplier_name,
-                    address: receipt.Supplier.supplier_address,
-                    phone: receipt.Supplier.supplier_phone,
-                    email: receipt.Supplier.supplier_email,
+                    id: receipt.supplier.id,
+                    name: receipt.supplier.supplier_name,
+                    address: receipt.supplier.supplier_address,
+                    phone: receipt.supplier.supplier_phone,
+                    email: receipt.supplier.supplier_email,
                 },
                 requestedUser: {
                     code: receipt.Account.user_code,
@@ -400,8 +390,8 @@ class ImportReceiptService {
             meta: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),
-                totalItems: filteredRows.length,
-                totalPages: Math.ceil(filteredRows.length / limit),
+                totalItems: importReceipts.count,
+                totalPages: Math.ceil(importReceipts.count / limit),
             },
         };
     }
@@ -412,7 +402,7 @@ class ImportReceiptService {
             include: [
                 {
                     model: database.Supplier,
-                    as: 'Supplier',
+                    as: 'supplier',
                     attributes: [
                         'id',
                         'supplier_name',
@@ -484,11 +474,11 @@ class ImportReceiptService {
                 status: importReceipt.status,
                 note: importReceipt.note,
                 supplier: {
-                    id: importReceipt.Supplier.id,
-                    name: importReceipt.Supplier.supplier_name,
-                    address: importReceipt.Supplier.supplier_address,
-                    phone: importReceipt.Supplier.supplier_phone,
-                    email: importReceipt.Supplier.supplier_email,
+                    id: importReceipt.supplier.id,
+                    name: importReceipt.supplier.supplier_name,
+                    address: importReceipt.supplier.supplier_address,
+                    phone: importReceipt.supplier.supplier_phone,
+                    email: importReceipt.supplier.supplier_email,
                 },
                 requestedUser: {
                     code: importReceipt.Account.user_code,

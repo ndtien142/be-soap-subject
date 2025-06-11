@@ -186,6 +186,7 @@ database.Supplier.hasMany(database.ImportReceipt, {
 });
 database.ImportReceipt.belongsTo(database.Supplier, {
     foreignKey: 'supplier_id',
+    as: 'supplier',
 });
 
 database.ImportReceipt.belongsTo(database.Account, {
