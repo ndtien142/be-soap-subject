@@ -595,14 +595,12 @@ class BorrowReceiptService {
                 include: [
                     {
                         model: database.Equipment,
-                        attributes: ['group_equipment_code'],
+                        attributes: ['group_equipment_code', 'serial_number'],
                         as: 'equipment',
                     },
                 ],
                 transaction,
             });
-
-            console.log('scanner count: ', scannedCounts.equipment);
 
             // Tạo map đếm group_equipment_code
             const scannedMap = {};
@@ -631,10 +629,16 @@ class BorrowReceiptService {
 
             // 8️⃣ Cập nhật status phiếu
             let newStatus = borrowReceipt.status;
+
             if (allGroupsDone) {
                 newStatus = 'borrowed';
                 // Update tất cả thiết bị sang in_use + day_of_first_use
-                const serialNumbers = scannedCounts.map((s) => s.serial_number);
+                const serialNumbers = [];
+                scannedCounts.forEach((item) => {
+                    serialNumbers.push(
+                        ...item.equipment.map((eq) => eq.serial_number),
+                    );
+                });
                 if (serialNumbers.length > 0) {
                     await database.Equipment.update(
                         {
