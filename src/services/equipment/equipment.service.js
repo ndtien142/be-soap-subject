@@ -120,6 +120,10 @@ class EquipmentService {
                         },
                     ],
                 },
+                {
+                    model: database.EquipmentImages,
+                    as: 'images',
+                },
             ],
         });
         if (equipment.import_receipt.approve_by) {
@@ -218,6 +222,17 @@ class EquipmentService {
                           },
                       }
                     : null,
+                images: equipment.images
+                    ? equipment.images.map((img) => ({
+                          id: img.id,
+                          actionType: img.action_type,
+                          actionId: img.action_id,
+                          imageUrl: img.image_url,
+                          note: img.note,
+                          uploadedBy: img.uploaded_by,
+                          uploadedAt: img.uploaded_at,
+                      }))
+                    : [],
             },
         };
     }
