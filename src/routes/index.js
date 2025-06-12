@@ -22,5 +22,7 @@ router.use('/v1/api/liquidation-receipt', require('./liquidation-receipt'));
 router.use('/v1/api/department', require('./department'));
 router.use('/v1/api/room', require('./room'));
 router.use('/v1/api/user', require('./user'));
+router.use('/v1/api/notification', require('./notification'));
+router.use('/v1/api/file-image', require('./file-image'));
 
 module.exports = router;

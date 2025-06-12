@@ -298,6 +298,19 @@ database.Room.belongsTo(database.Department, {
     as: 'department',
 });
 
+// Images
+database.Equipment.hasMany(database.EquipmentImages, {
+    foreignKey: 'serial_number',
+    sourceKey: 'serial_number',
+    as: 'images',
+});
+
+database.EquipmentImages.belongsTo(database.Equipment, {
+    foreignKey: 'serial_number',
+    targetKey: 'serial_number',
+    as: 'equipment',
+});
+
 // Sync the models with the database
 sequelize
     .sync()
