@@ -7,11 +7,13 @@ class LiquidationController {
     createLiquidationReceipt = async (req, res, next) => {
         new CREATED({
             message: 'Create liquidation receipt successfully',
-            data: await LiquidationReceiptService.createLiquidationReceipt(
-                req.body,
-            ),
+            metadata: await LiquidationReceiptService.createLiquidationReceipt({
+                ...req.body,
+                user: req.user, // nếu bạn muốn truyền thêm thông tin người dùng hiện tại
+            }),
         }).send(res);
     };
+    
 
     approveLiquidationReceipt = async (req, res, next) => {
         new SuccessResponse({
@@ -37,11 +39,12 @@ class LiquidationController {
     getAllLiquidationReceipts = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all liquidation receipts successfully',
-            data: await LiquidationReceiptService.getAllLiquidationReceipts(
+            metadata: await LiquidationReceiptService.getAllLiquidationReceipts(
                 req.query,
             ),
         }).send(res);
     };
+    
 
     getLiquidationReceiptDetails = async (req, res, next) => {
         new SuccessResponse({

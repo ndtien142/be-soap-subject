@@ -149,6 +149,66 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /report/asset-inflow:
+ *   get:
+ *     summary: Get total asset value inflow statistics
+ *     description: |
+ *       Returns the total value of imported assets (price × quantity) grouped by **week**, **quarter**, or **year** within a specified date range.
+ *     tags: [Report]
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [week, quarter, year]
+ *         description: The period to group the data by
+ *       - in: query
+ *         name: from
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date (YYYY-MM-DD)
+ *       - in: query
+ *         name: to
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date (YYYY-MM-DD)
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *     responses:
+ *       200:
+ *         description: Asset inflow report returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Get asset inflow report successfully
+ *                 metadata:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       period:
+ *                         type: string
+ *                         example: "2025-Q2"
+ *                       totalValue:
+ *                         type: number
+ *                         example: 120000000
+ */
+
+
+/**
+ * @swagger
  * /report/import/count:
  *   get:
  *     summary: Get total count of import receipts
@@ -183,5 +243,9 @@ router.get(
     asyncHandler(reportController.getLiquidationReceiptStatusCounts),
 );
 router.get('/import/count', asyncHandler(reportController.countImportReceipts));
+router.get(
+    '/asset-inflow',
+    asyncHandler(reportController.getAssetInflowReport),
+);
 
 module.exports = router;

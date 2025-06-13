@@ -35,7 +35,7 @@ class LiquidationReceiptService {
         }
         for (const eq of equipmentList) {
             if (
-                eq.status === 'pending_liquidation' ||
+                eq.status === 'pending' ||
                 eq.status === 'reserved'
             ) {
                 throw new BadRequestError(
@@ -44,7 +44,7 @@ class LiquidationReceiptService {
             }
         }
 
-        // Create liquidation receipt
+        // Create liquidation receipt`
         const liquidationReceipt = await database.LiquidationReceipt.create(
             {
                 liquidation_date: liquidationDate,
@@ -66,18 +66,16 @@ class LiquidationReceiptService {
                 },
                 { transaction },
             );
-            await database.Equipment.update(
-                { status: 'pending_liquidation' },
-                { where: { serial_number: item.serialNumber }, transaction },
-            );
         }
 
         await transaction.commit();
-
+        console.log(
+            `Liquidation receipt created with ID: ${liquidationReceipt.id}`,
+        );
         return {
             code: 200,
             message: 'Liquidation receipt created successfully',
-            data: {
+            metadata: {
                 id: liquidationReceipt.id,
                 liquidationDate: liquidationReceipt.liquidation_date,
                 userCode: liquidationReceipt.user_code,
@@ -105,13 +103,13 @@ class LiquidationReceiptService {
         liquidationReceipt.approve_by = approverCode;
         await liquidationReceipt.save();
 
-        // Set equipment status to 'pending_liquidation'
+        // Set equipment status to 'pending'
         const details = await database.LiquidationReceiptDetail.findAll({
             where: { liquidation_receipt_id: id },
         });
         for (const detail of details) {
             await database.Equipment.update(
-                { status: 'pending_liquidation' },
+                { status: 'pending' },
                 { where: { serial_number: detail.serial_number } },
             );
         }
@@ -197,24 +195,51 @@ class LiquidationReceiptService {
         };
     }
 
-    static async getAllLiquidationReceipts({ page = 1, limit = 20 }) {
+    static async getAllLiquidationReceipts({
+        page = 1,
+        limit = 20,
+        searchText,
+        status,
+        liquidationDate,
+    }) {
         const offset = (parseInt(page) - 1) * parseInt(limit);
+        const { Op } = require('sequelize');
+    
+        // Điều kiện truy vấn bảng LiquidationReceipt
+        const where = {};
+        if (status) {
+            where.status = status;
+        }
+        if (liquidationDate) {
+            where.liquidation_date = liquidationDate;
+        }
+    
+        // Điều kiện truy vấn bảng Account (tìm theo tên)
+        let accountWhere = undefined;
+        if (searchText) {
+            accountWhere = {
+                full_name: { [Op.iLike]: `%${searchText}%` },
+            };
+        }
+    
         const result = await database.LiquidationReceipt.findAndCountAll({
+            where,
             limit: parseInt(limit),
             offset,
+            distinct: true,
+            order: [['create_time', 'DESC']],
             include: [
                 {
                     model: database.Account,
                     as: 'account',
+                    ...(accountWhere && { where: accountWhere }),
                 },
             ],
-            order: [['create_time', 'DESC']],
         });
+    
         return {
-            code: 200,
-            message: 'Get all liquidation receipts successfully',
-            metadata: result.rows,
-            meta: {
+            receipts: result.rows,
+            pagination: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),
                 totalItems: result.count,
@@ -222,6 +247,7 @@ class LiquidationReceiptService {
             },
         };
     }
+    
 
     static async getLiquidationReceiptDetails(id) {
         const liquidationReceipt = await database.LiquidationReceipt.findOne({
