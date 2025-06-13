@@ -143,15 +143,18 @@ class RoleService {
             message: 'Get all roles successfully',
             metadata: result.rows.map((r) => ({
                 id: r.id,
-                roleName: r.role_name,
-                roleDescription: r.role_description,
-                permissions:
-                    r.permissions?.map((p) => ({
-                        id: p.id,
-                        permissionName: p.permission_name,
-                        permissionDescription: p.permission_description,
-                        slug: p.slug,
-                    })) || [],
+                name: r.role_name,
+                description: r.role_description,
+                permissions: Array.isArray(r.permissions)
+                    ? r.permissions
+                          .filter((p) => p != null)
+                          .map((p) => ({
+                              id: p.id,
+                              name: p.permission_name,
+                              description: p.permission_description,
+                              slug: p.slug,
+                          }))
+                    : [],
                 createdAt: r.create_time,
                 updatedAt: r.update_time,
             })),
@@ -181,15 +184,15 @@ class RoleService {
         return {
             code: 200,
             message: 'Get role by ID successfully',
-            data: {
+            metadata: {
                 id: role.id,
-                roleName: role.role_name,
-                roleDescription: role.role_description,
+                name: role.role_name,
+                description: role.role_description,
                 permissions:
                     role.permissions?.map((p) => ({
                         id: p.id,
-                        permissionName: p.permission_name,
-                        permissionDescription: p.permission_description,
+                        name: p.permission_name,
+                        description: p.permission_description,
                         slug: p.slug,
                     })) || [],
                 createdAt: role.create_time,

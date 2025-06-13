@@ -30,9 +30,9 @@ const router = express.Router();
  *       properties:
  *         id:
  *           type: integer
- *         roleName:
+ *         name:
  *           type: string
- *         roleDescription:
+ *         description:
  *           type: string
  *         permissions:
  *           type: array
@@ -72,6 +72,53 @@ const router = express.Router();
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/PermissionRef'
+ *     SuccessResponseRole:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: integer
+ *         message:
+ *           type: string
+ *         data:
+ *           $ref: '#/components/schemas/Role'
+ *     SuccessResponseRoleList:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: integer
+ *         message:
+ *           type: string
+ *         metadata:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Role'
+ *         meta:
+ *           type: object
+ *           properties:
+ *             currentPage:
+ *               type: integer
+ *             itemPerPage:
+ *               type: integer
+ *             totalItems:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *     SuccessResponseRoleById:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: integer
+ *         message:
+ *           type: string
+ *         metadata:
+ *           $ref: '#/components/schemas/Role'
+ *     SuccessResponseDelete:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: integer
+ *         message:
+ *           type: string
  */
 
 /**
@@ -81,7 +128,6 @@ const router = express.Router();
  *     summary: Create a new role
  *     security:
  *       - BearerAuth: []
- *     parameters:
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -95,7 +141,7 @@ const router = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Role'
+ *               $ref: '#/components/schemas/SuccessResponseRole'
  */
 
 /**
@@ -105,7 +151,6 @@ const router = express.Router();
  *     summary: Update a role
  *     security:
  *       - BearerAuth: []
- *     parameters:
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -119,7 +164,7 @@ const router = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Role'
+ *               $ref: '#/components/schemas/SuccessResponseRole'
  */
 
 /**
@@ -139,6 +184,10 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Role deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseDelete'
  */
 
 /**
@@ -164,23 +213,7 @@ const router = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 metadata:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Role'
- *                 meta:
- *                   type: object
- *                   properties:
- *                     currentPage:
- *                       type: integer
- *                     itemPerPage:
- *                       type: integer
- *                     totalItems:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
+ *               $ref: '#/components/schemas/SuccessResponseRoleList'
  */
 
 /**
@@ -203,7 +236,7 @@ const router = express.Router();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Role'
+ *               $ref: '#/components/schemas/SuccessResponseRoleById'
  */
 
 // router.use(authenticationV2);

@@ -111,8 +111,8 @@ class PermissionService {
             message: 'Get all permissions successfully',
             metadata: result.rows.map((p) => ({
                 id: p.id,
-                permissionName: p.permission_name,
-                permissionDescription: p.permission_description,
+                name: p.permission_name,
+                description: p.permission_description,
                 slug: p.slug,
             })),
             meta: {
@@ -133,10 +133,10 @@ class PermissionService {
         return {
             code: 200,
             message: 'Get permission by ID successfully',
-            data: {
+            metadata: {
                 id: permission.id,
-                permissionName: permission.permission_name,
-                permissionDescription: permission.permission_description,
+                name: permission.permission_name,
+                description: permission.permission_description,
                 slug: permission.slug,
             },
         };
