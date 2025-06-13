@@ -24,5 +24,6 @@ router.use('/v1/api/room', require('./room'));
 router.use('/v1/api/user', require('./user'));
 router.use('/v1/api/notification', require('./notification'));
 router.use('/v1/api/file-image', require('./file-image'));
+router.use('/v1/api/report', require('./report'));
 
 module.exports = router;

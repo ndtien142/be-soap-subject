@@ -5,10 +5,11 @@ const database = require('../../models');
 
 class LiquidationReceiptService {
     static async createLiquidationReceipt({
-        userCode,
         liquidationDate,
+        reason,
+        userCode,
         items,
-        note,
+        notes,
     }) {
         const transaction = await database.sequelize.transaction();
 
@@ -33,9 +34,12 @@ class LiquidationReceiptService {
             throw new BadRequestError('Some equipment not found');
         }
         for (const eq of equipmentList) {
-            if (eq.status === 'liquidation') {
+            if (
+                eq.status === 'pending_liquidation' ||
+                eq.status === 'reserved'
+            ) {
                 throw new BadRequestError(
-                    `Equipment ${eq.serial_number} is already liquidated`,
+                    `Equipment ${eq.serial_number} is already pending liquidation or reserved`,
                 );
             }
         }
@@ -44,26 +48,26 @@ class LiquidationReceiptService {
         const liquidationReceipt = await database.LiquidationReceipt.create(
             {
                 liquidation_date: liquidationDate,
+                reason,
                 user_code: userCode,
                 status: 'requested',
-                note,
+                notes,
             },
             { transaction },
         );
 
-        // Create liquidation receipt details and update equipment status
+        // Create liquidation receipt details and set equipment status to pending_liquidation
         for (const item of items) {
             await database.LiquidationReceiptDetail.create(
                 {
                     liquidation_receipt_id: liquidationReceipt.id,
                     serial_number: item.serialNumber,
-                    note: item.note || null,
+                    notes: item.notes || null,
                 },
                 { transaction },
             );
-
             await database.Equipment.update(
-                { status: 'liquidation' },
+                { status: 'pending_liquidation' },
                 { where: { serial_number: item.serialNumber }, transaction },
             );
         }
@@ -75,13 +79,13 @@ class LiquidationReceiptService {
             message: 'Liquidation receipt created successfully',
             data: {
                 id: liquidationReceipt.id,
-                userCode: liquidationReceipt.user_code,
                 liquidationDate: liquidationReceipt.liquidation_date,
+                userCode: liquidationReceipt.user_code,
                 status: liquidationReceipt.status,
-                note: liquidationReceipt.note,
+                notes: liquidationReceipt.notes,
                 items: items.map((i) => ({
                     serialNumber: i.serialNumber,
-                    note: i.note,
+                    notes: i.notes,
                 })),
             },
         };
@@ -100,6 +104,18 @@ class LiquidationReceiptService {
         liquidationReceipt.status = 'approved';
         liquidationReceipt.approve_by = approverCode;
         await liquidationReceipt.save();
+
+        // Set equipment status to 'pending_liquidation'
+        const details = await database.LiquidationReceiptDetail.findAll({
+            where: { liquidation_receipt_id: id },
+        });
+        for (const detail of details) {
+            await database.Equipment.update(
+                { status: 'pending_liquidation' },
+                { where: { serial_number: detail.serial_number } },
+            );
+        }
+
         return {
             code: 200,
             message: 'Liquidation receipt approved',
@@ -122,10 +138,10 @@ class LiquidationReceiptService {
         }
         liquidationReceipt.status = 'rejected';
         liquidationReceipt.approve_by = approverCode;
-        liquidationReceipt.note = reason || liquidationReceipt.note;
+        liquidationReceipt.notes = reason || liquidationReceipt.notes;
         await liquidationReceipt.save();
 
-        // Set equipment status back to available
+        // Set equipment status back to 'available'
         const details = await database.LiquidationReceiptDetail.findAll({
             where: { liquidation_receipt_id: id },
         });
@@ -142,7 +158,41 @@ class LiquidationReceiptService {
             data: {
                 id: liquidationReceipt.id,
                 status: liquidationReceipt.status,
-                note: liquidationReceipt.note,
+                notes: liquidationReceipt.notes,
+            },
+        };
+    }
+
+    static async markAsLiquidated(id) {
+        const liquidationReceipt =
+            await database.LiquidationReceipt.findByPk(id);
+        if (!liquidationReceipt)
+            throw new BadRequestError('Liquidation receipt not found');
+        if (liquidationReceipt.status !== 'approved') {
+            throw new BadRequestError(
+                'Only approved receipts can be marked as liquidated',
+            );
+        }
+        liquidationReceipt.status = 'liquidated';
+        await liquidationReceipt.save();
+
+        // Update equipment status to 'liquidated'
+        const details = await database.LiquidationReceiptDetail.findAll({
+            where: { liquidation_receipt_id: id },
+        });
+        for (const detail of details) {
+            await database.Equipment.update(
+                { status: 'liquidated' },
+                { where: { serial_number: detail.serial_number } },
+            );
+        }
+
+        return {
+            code: 200,
+            message: 'Liquidation receipt marked as liquidated',
+            data: {
+                id: liquidationReceipt.id,
+                status: liquidationReceipt.status,
             },
         };
     }
