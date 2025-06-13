@@ -118,6 +118,9 @@ router.use(authenticationV2);
  *     summary: Create a new user
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -142,6 +145,8 @@ router.use(authenticationV2);
  *     security:
  *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: query
  *         name: page
  *         schema:
@@ -184,6 +189,8 @@ router.use(authenticationV2);
  *     security:
  *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -207,6 +214,8 @@ router.use(authenticationV2);
  *     security:
  *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -236,6 +245,8 @@ router.use(authenticationV2);
  *     security:
  *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true
@@ -264,6 +275,8 @@ router.use(authenticationV2);
  *     security:
  *       - BearerAuth: []
  *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
  *       - in: path
  *         name: id
  *         required: true

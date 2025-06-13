@@ -6,6 +6,7 @@ const database = require('../../models');
 class TransferReceiptService {
     static async createTransferReceipt({
         transferDate,
+        createBy,
         transferFrom,
         transferTo,
         userCode,
@@ -75,6 +76,7 @@ class TransferReceiptService {
                 transfer_from: transferFrom,
                 transfer_to: transferTo,
                 user_code: userCode,
+                created_by: createBy,
                 status: 'requested',
                 notes,
             },
@@ -220,18 +222,79 @@ class TransferReceiptService {
         const result = await database.TransferReceipt.findAndCountAll({
             limit: parseInt(limit),
             offset,
-            include: [
-                {
-                    model: database.Account,
-                    as: 'account',
-                },
-            ],
             order: [['create_time', 'DESC']],
         });
+        const dataTransfer = await Promise.all(
+            result.rows.map(async (receipt) => {
+                const roomFrom = await database.Room.findByPk(
+                    receipt.transfer_from,
+                );
+                const roomTo = await database.Room.findByPk(
+                    receipt.transfer_to,
+                );
+                if (!roomFrom || !roomTo) {
+                    throw new BadRequestError('One of the rooms not found');
+                }
+
+                receipt.transfer_date = receipt.transfer_date
+                    ? new Date(receipt.transfer_date)
+                          .toISOString()
+                          .split('T')[0]
+                    : null;
+                receipt.create_time = receipt.create_time
+                    ? new Date(receipt.create_time).toISOString().split('T')[0]
+                    : null;
+                receipt.update_time = receipt.update_time
+                    ? new Date(receipt.update_time).toISOString().split('T')[0]
+                    : null;
+
+                const foundResponsible = await database.Account.findOne({
+                    where: { user_code: receipt.user_code },
+                });
+                const foundApprover = await database.Account.findOne({
+                    where: { user_code: receipt.approve_by },
+                });
+                const foundCreator = await database.Account.findOne({
+                    where: { user_code: receipt.created_by },
+                });
+
+                return {
+                    id: receipt.id,
+                    transferFrom: {
+                        id: roomFrom.room_id,
+                        name: roomFrom.room_name,
+                    },
+                    transferTo: {
+                        id: roomTo.room_id,
+                        name: roomTo.room_name,
+                    },
+                    transferDate: receipt.transfer_date,
+                    responsibleBy: {
+                        userCode: receipt.user_code,
+                        username: foundResponsible
+                            ? foundResponsible.username
+                            : null,
+                    },
+                    approveBy: {
+                        userCode: receipt.approve_by,
+                        username: foundApprover ? foundApprover.username : null,
+                    },
+                    createdBy: {
+                        userCode: receipt.created_by,
+                        username: foundCreator ? foundCreator.username : null,
+                    },
+                    status: receipt.status,
+                    notes: receipt.notes,
+                    createdAt: receipt.create_time,
+                    updatedAt: receipt.update_time,
+                };
+            }),
+        );
+
         return {
             code: 200,
             message: 'Get all transfer receipts successfully',
-            metadata: result.rows,
+            metadata: dataTransfer,
             meta: {
                 currentPage: parseInt(page),
                 itemPerPage: parseInt(limit),
@@ -246,16 +309,23 @@ class TransferReceiptService {
             where: { id },
             include: [
                 {
-                    model: database.Account,
-                    as: 'account',
-                },
-                {
-                    model: database.TransferReceiptDetail,
-                    as: 'TransferReceiptDetails',
+                    model: database.Equipment,
+                    as: 'equipment',
                     include: [
                         {
-                            model: database.Equipment,
-                            as: 'equipment',
+                            model: database.EquipmentImages,
+                            as: 'images',
+                            attributes: ['image_url'],
+                        },
+                        {
+                            model: database.GroupEquipment,
+                            as: 'group_equipment',
+                            include: [
+                                {
+                                    model: database.EquipmentType,
+                                    as: 'equipment_type',
+                                },
+                            ],
                         },
                     ],
                 },
@@ -263,10 +333,103 @@ class TransferReceiptService {
         });
         if (!transferReceipt)
             throw new BadRequestError('Transfer receipt not found');
+
+        // Get room info
+        const roomFrom = await database.Room.findByPk(
+            transferReceipt.transfer_from,
+        );
+        const roomTo = await database.Room.findByPk(
+            transferReceipt.transfer_to,
+        );
+        if (!roomFrom || !roomTo) {
+            throw new BadRequestError('One of the rooms not found');
+        }
+
+        // Format dates
+        const transferDate = transferReceipt.transfer_date
+            ? new Date(transferReceipt.transfer_date)
+                  .toISOString()
+                  .split('T')[0]
+            : null;
+        const createdAt = transferReceipt.create_time
+            ? new Date(transferReceipt.create_time).toISOString().split('T')[0]
+            : null;
+        const updatedAt = transferReceipt.update_time
+            ? new Date(transferReceipt.update_time).toISOString().split('T')[0]
+            : null;
+
+        // Get user info
+        const foundResponsible = await database.Account.findOne({
+            where: { user_code: transferReceipt.user_code },
+        });
+        const foundApprover = await database.Account.findOne({
+            where: { user_code: transferReceipt.approve_by },
+        });
+        const foundCreator = await database.Account.findOne({
+            where: { user_code: transferReceipt.created_by },
+        });
+
+        console.log(
+            'Transfer Receipt Details:',
+            transferReceipt,
+            roomFrom,
+            roomTo,
+            foundResponsible,
+            foundApprover,
+            foundCreator,
+        );
+
+        console.log(
+            'Transfer Receipt Details Items:',
+            transferReceipt.equipment,
+        );
+
+        const items = transferReceipt.equipment.map((eq) => ({
+            serialNumber: eq.serial_number,
+            dateOfFirstUse: eq.date_of_first_use,
+            description: eq.equipment_description,
+            notes: eq.TransferReceiptDetail.notes || null,
+            images: eq.images.map((img) => img.image_url),
+            type: {
+                id: eq.group_equipment.equipment_type.id,
+                name: eq.group_equipment.equipment_type.equipment_type_name,
+            },
+        }));
+
         return {
             code: 200,
             message: 'Get transfer receipt details successfully',
-            data: transferReceipt,
+            metadata: {
+                id: transferReceipt.id,
+                transferFrom: {
+                    id: roomFrom.room_id,
+                    name: roomFrom.room_name,
+                },
+                transferTo: {
+                    id: roomTo.room_id,
+                    name: roomTo.room_name,
+                },
+                transferDate,
+                responsibleBy: {
+                    userCode: transferReceipt.user_code,
+                    username: foundResponsible
+                        ? foundResponsible.username
+                        : null,
+                },
+                approveBy: {
+                    userCode: transferReceipt.approve_by,
+                    username: foundApprover ? foundApprover.username : null,
+                },
+                createdBy: {
+                    userCode: transferReceipt.created_by,
+                    username: foundCreator ? foundCreator.username : null,
+                },
+                status: transferReceipt.status,
+                notes: transferReceipt.notes,
+                createdAt,
+                updatedAt,
+                items,
+            },
         };
     }
 
@@ -281,11 +444,39 @@ class TransferReceiptService {
                 room_id: roomId,
                 status: 'in_use',
             },
+            include: [
+                {
+                    model: database.EquipmentImages,
+                    as: 'images',
+                    attributes: ['image_url'],
+                },
+                {
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
+                    include: [
+                        {
+                            model: database.EquipmentType,
+                            as: 'equipment_type',
+                        },
+                    ],
+                },
+            ],
         });
+
         return {
             code: 200,
             message: 'Get all equipment in room successfully',
-            metadata: equipments,
+            metadata: equipments.map((eq) => ({
+                serialNumber: eq.serial_number,
+                name: eq.group_equipment.group_equipment_name,
+                type: {
+                    id: eq.group_equipment.equipment_type.id,
+                    name: eq.group_equipment.equipment_type.equipment_type_name,
+                },
+                description: eq.equipment_description,
+                status: eq.status,
+                images: eq.images.map((img) => img.image_url),
+            })),
         };
     }
 }

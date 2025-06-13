@@ -7,9 +7,10 @@ class TransferReceiptController {
     createTransferReceipt = async (req, res, next) => {
         new CREATED({
             message: 'Create transfer receipt successfully',
-            metadata: await TransferReceiptService.createTransferReceipt(
-                req.body,
-            ),
+            metadata: await TransferReceiptService.createTransferReceipt({
+                ...req.body,
+                createBy: req.user.userCode,
+            }),
         }).send(res);
     };
 

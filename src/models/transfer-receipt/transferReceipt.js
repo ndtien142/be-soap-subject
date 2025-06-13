@@ -23,13 +23,13 @@ function model(sequelize) {
             type: DataTypes.STRING(50),
             allowNull: false,
         },
-        department_id: {
-            type: DataTypes.STRING(20),
-            allowNull: false,
-        },
         user_code: {
             type: DataTypes.STRING(20),
             allowNull: false,
+        },
+        created_by: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
         },
         approve_by: {
             type: DataTypes.STRING(20),

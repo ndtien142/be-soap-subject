@@ -155,6 +155,11 @@ database.Profile.belongsTo(database.Account, {
     as: 'account',
 });
 
+database.Account.hasMany(database.Profile, {
+    foreignKey: 'user_code',
+    as: 'profile',
+});
+
 // Equipment associations
 database.GroupEquipment.belongsTo(database.EquipmentType, {
     foreignKey: 'equipment_type_id',
