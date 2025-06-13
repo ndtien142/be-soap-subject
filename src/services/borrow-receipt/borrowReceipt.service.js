@@ -491,7 +491,6 @@ class BorrowReceiptService {
 
     static async checkEquipmentAvailable({ groups }) {
         // groups: [{ groupEquipmentCode, quantity }]
-        console.log(groups);
         if (!Array.isArray(groups) || groups.length === 0) {
             throw new BadRequestError('groups is required');
         }
@@ -630,32 +629,9 @@ class BorrowReceiptService {
             // 8️⃣ Cập nhật status phiếu
             let newStatus = borrowReceipt.status;
 
-            if (allGroupsDone) {
-                newStatus = 'borrowed';
-                // Update tất cả thiết bị sang in_use + day_of_first_use
-                const serialNumbers = [];
-                scannedCounts.forEach((item) => {
-                    serialNumbers.push(
-                        ...item.equipment.map((eq) => eq.serial_number),
-                    );
-                });
-                if (serialNumbers.length > 0) {
-                    await database.Equipment.update(
-                        {
-                            status: 'in_use',
-                            day_of_first_use: database.sequelize.literal(
-                                'CASE WHEN day_of_first_use IS NULL THEN NOW() ELSE day_of_first_use END',
-                            ),
-                        },
-                        {
-                            where: { serial_number: serialNumbers },
-                            transaction,
-                        },
-                    );
-                }
-            } else {
-                newStatus = 'processing';
-            }
+            // Do NOT auto mark as 'borrowed' when enough equipment is scanned.
+            // Always keep status as 'processing' until explicit confirmation (e.g., upload multi file confirm).
+            newStatus = 'processing';
 
             borrowReceipt.status = newStatus;
             await borrowReceipt.save({ transaction });
@@ -887,6 +863,84 @@ class BorrowReceiptService {
             allAvailable,
             message: 'Available status checked successfully',
         };
+    }
+
+    /**
+     * Mark a borrow receipt as borrowed after confirmation (e.g., after uploading all required files).
+     * This will set status to 'borrowed', update day_of_first_use for equipment, set equipment status to 'in_use', and create files.
+     * @param {number} borrowReceiptId
+     * @param {Array<{serialNumber: string, files: Array<{filePath: string, fileName: string, note?: string}>}>} equipmentFiles
+     * @param {string} userCode
+     * @returns {object}
+     */
+    static async maskBorrowedAndSetDayOfFirstUse({ borrowReceiptId, equipmentFiles, userCode }) {
+        const transaction = await database.sequelize.transaction();
+        try {
+            // 1. Find borrow receipt and check status
+            const borrowReceipt = await database.BorrowReceipt.findByPk(borrowReceiptId, { transaction });
+            if (!borrowReceipt) throw new BadRequestError('Borrow receipt not found');
+            if (borrowReceipt.status !== 'processing') {
+                throw new BadRequestError('Only processing receipts can be marked as borrowed');
+            }
+
+            // 2. Get all BorrowReceiptDetail for this receipt
+            const details = await database.BorrowReceiptDetail.findAll({
+                where: { borrow_receipt_id: borrowReceiptId },
+                transaction,
+            });
+            const serialNumbers = details.map(d => d.serial_number);
+
+            // 3. Update equipment status and day_of_first_use
+            await database.Equipment.update(
+                {
+                    status: 'in_use',
+                    day_of_first_use: database.sequelize.literal(
+                        'CASE WHEN day_of_first_use IS NULL THEN NOW() ELSE day_of_first_use END'
+                    ),
+                },
+                {
+                    where: { serial_number: serialNumbers },
+                    transaction,
+                }
+            );
+
+            // 4. Create files for each equipment if provided
+            if (Array.isArray(equipmentFiles)) {
+                for (const eq of equipmentFiles) {
+                    if (Array.isArray(eq.files)) {
+                        for (const file of eq.files) {
+                            await database.ReceiptFiles.create({
+                                receipt_type: 'borrow',
+                                receipt_id: borrowReceiptId,
+                                file_path: file.filePath,
+                                file_name: file.fileName,
+                                upload_by: userCode,
+                                upload_time: new Date(),
+                                note: file.note,
+                            }, { transaction });
+                        }
+                    }
+                }
+            }
+
+            // 5. Update borrow receipt status
+            borrowReceipt.status = 'borrowed';
+            await borrowReceipt.save({ transaction });
+
+            await transaction.commit();
+
+            return {
+                code: 200,
+                message: 'Borrow receipt marked as borrowed, equipment updated, and files created successfully',
+                data: {
+                    borrowReceiptId,
+                    serialNumbers,
+                },
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 }
 

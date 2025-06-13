@@ -31,11 +31,6 @@ class BorrowReceiptController {
                     reason,
                 );
                 break;
-            case 'mark-borrowed':
-                result = await BorrowReceiptService.markAsBorrowed(
-                    req.params.id,
-                );
-                break;
             case 'mark-returned':
                 result = await BorrowReceiptService.markAsReturned(
                     req.params.id,
@@ -110,6 +105,26 @@ class BorrowReceiptController {
                 await BorrowReceiptService.getListAvailableOfBorrowReceipt(
                     req.params.id,
                 ),
+        }).send(res);
+    };
+
+    /**
+     * Confirm borrow: mark as borrowed, set day_of_first_use, set equipment status, create files.
+     * Expects: { equipmentFiles } in req.body (see service for structure)
+     */
+    confirmBorrowed = async (req, res, next) => {
+        const { equipmentFiles } = req.body;
+        const borrowReceiptId = req.params.id;
+        const userCode = req.user.userCode;
+        const result =
+            await BorrowReceiptService.maskBorrowedAndSetDayOfFirstUse({
+                borrowReceiptId,
+                equipmentFiles,
+                userCode,
+            });
+        new SuccessResponse({
+            message: 'Borrow receipt marked as borrowed and files created',
+            metadata: result,
         }).send(res);
     };
 }

@@ -395,6 +395,70 @@ const router = express.Router();
  *                         type: integer
  */
 
+/**
+ * @swagger
+ * /borrow-receipt/{id}/confirm-borrowed:
+ *   post:
+ *     summary: Confirm borrow, mark as borrowed, set day of first use, set equipment status, and create files
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     tags: [BorrowReceipt]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               equipmentFiles:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     serialNumber:
+ *                       type: string
+ *                     files:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           filePath:
+ *                             type: string
+ *                           fileName:
+ *                             type: string
+ *                           note:
+ *                             type: string
+ *     responses:
+ *       200:
+ *         description: Borrow receipt marked as borrowed and files created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     borrowReceiptId:
+ *                       type: integer
+ *                     serialNumbers:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ */
+
 router.use(authenticationV2);
 
 router.post('', asyncHandler(borrowReceiptController.createBorrowReceipt));
@@ -419,6 +483,10 @@ router.get(
 router.get(
     '/:id/list-available',
     asyncHandler(borrowReceiptController.getListAvailable),
+);
+router.post(
+    '/:id/confirm-borrowed',
+    asyncHandler(borrowReceiptController.confirmBorrowed),
 );
 
 module.exports = router;
