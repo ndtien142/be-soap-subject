@@ -269,6 +269,25 @@ class TransferReceiptService {
             data: transferReceipt,
         };
     }
+
+    /**
+     * Get all equipment in a specific room with status 'in_use'.
+     * @param {string} roomId
+     * @returns {Promise<Array>}
+     */
+    static async getAllEquipmentInRoom(roomId) {
+        const equipments = await database.Equipment.findAll({
+            where: {
+                room_id: roomId,
+                status: 'in_use',
+            },
+        });
+        return {
+            code: 200,
+            message: 'Get all equipment in room successfully',
+            metadata: equipments,
+        };
+    }
 }
 
 module.exports = TransferReceiptService;

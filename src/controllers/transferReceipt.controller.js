@@ -7,14 +7,16 @@ class TransferReceiptController {
     createTransferReceipt = async (req, res, next) => {
         new CREATED({
             message: 'Create transfer receipt successfully',
-            data: await TransferReceiptService.createTransferReceipt(req.body),
+            metadata: await TransferReceiptService.createTransferReceipt(
+                req.body,
+            ),
         }).send(res);
     };
 
     approveTransferReceipt = async (req, res, next) => {
         new SuccessResponse({
             message: 'Approve transfer receipt successfully',
-            data: await TransferReceiptService.approveTransferReceipt(
+            metadata: await TransferReceiptService.approveTransferReceipt(
                 req.params.id,
                 req.body.approverCode,
             ),
@@ -24,7 +26,7 @@ class TransferReceiptController {
     rejectTransferReceipt = async (req, res, next) => {
         new SuccessResponse({
             message: 'Reject transfer receipt successfully',
-            data: await TransferReceiptService.rejectTransferReceipt(
+            metadata: await TransferReceiptService.rejectTransferReceipt(
                 req.params.id,
                 req.body.approverCode,
                 req.body.reason,
@@ -35,14 +37,16 @@ class TransferReceiptController {
     markAsTransferred = async (req, res, next) => {
         new SuccessResponse({
             message: 'Mark as transferred successfully',
-            data: await TransferReceiptService.markAsTransferred(req.params.id),
+            metadata: await TransferReceiptService.markAsTransferred(
+                req.params.id,
+            ),
         }).send(res);
     };
 
     getAllTransferReceipts = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get all transfer receipts successfully',
-            data: await TransferReceiptService.getAllTransferReceipts(
+            metadata: await TransferReceiptService.getAllTransferReceipts(
                 req.query,
             ),
         }).send(res);
@@ -51,8 +55,17 @@ class TransferReceiptController {
     getTransferReceiptDetails = async (req, res, next) => {
         new SuccessResponse({
             message: 'Get transfer receipt details successfully',
-            data: await TransferReceiptService.getTransferReceiptDetails(
+            metadata: await TransferReceiptService.getTransferReceiptDetails(
                 req.params.id,
+            ),
+        }).send(res);
+    };
+
+    getAllEquipmentInRoom = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get all equipment in room successfully',
+            metadata: await TransferReceiptService.getAllEquipmentInRoom(
+                req.params.roomId,
             ),
         }).send(res);
     };

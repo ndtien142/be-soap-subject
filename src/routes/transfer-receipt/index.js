@@ -258,6 +258,40 @@ const router = express.Router();
  *               $ref: '#/components/schemas/TransferReceipt'
  */
 
+/**
+ * @swagger
+ * /transfer-receipt/room/{roomId}/equipment:
+ *   get:
+ *     summary: Get all equipment in a specific room with status 'in_use'
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/UserCodeHeader'
+ *       - $ref: '#/components/parameters/RefreshTokenHeader'
+ *       - in: path
+ *         name: roomId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     tags: [TransferReceipt]
+ *     responses:
+ *       200:
+ *         description: List of equipment in the room
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Equipment'
+ */
+
 router.use(authenticationV2);
 
 router.post('', asyncHandler(transferReceiptController.createTransferReceipt));
@@ -277,6 +311,10 @@ router.get('', asyncHandler(transferReceiptController.getAllTransferReceipts));
 router.get(
     '/:id',
     asyncHandler(transferReceiptController.getTransferReceiptDetails),
+);
+router.get(
+    '/room/:roomId/equipment',
+    asyncHandler(transferReceiptController.getAllEquipmentInRoom),
 );
 
 module.exports = router;

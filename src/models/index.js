@@ -77,6 +77,9 @@ const BorrowRequestItem = require('./borrow-receipt/borrowRequestItem')(
 const EquipmentImages = require('./files/equipmentImages')(sequelize);
 const ReceiptFiles = require('./files/receiptFiles')(sequelize);
 
+// Import notification model
+const Notification = require('./notification/notification')(sequelize);
+
 database.Account = Account;
 database.Role = Role;
 database.KeyToken = KeyToken;
@@ -116,6 +119,9 @@ database.BorrowRequestItem = BorrowRequestItem;
 // Files and images
 database.EquipmentImages = EquipmentImages;
 database.ReceiptFiles = ReceiptFiles;
+
+// Notification
+database.Notification = Notification;
 
 // Add model to db object
 
