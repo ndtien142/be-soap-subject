@@ -240,7 +240,7 @@ class GroupEquipmentService {
         searchText,
     }) => {
         const offset = (parseInt(page) - 1) * parseInt(limit);
-
+    
         // Build where clause
         const where = { is_deleted: false };
         if (searchText) {
@@ -249,74 +249,75 @@ class GroupEquipmentService {
                 { group_equipment_code: { [Op.like]: `%${searchText}%` } },
             ];
         }
-
-        const groupEquipmentList =
-            await database.GroupEquipment.findAndCountAll({
-                where,
-                limit: parseInt(limit),
-                offset,
-                include: [
-                    {
-                        model: database.EquipmentType,
-                        as: 'equipment_type',
-                        attributes: ['equipment_type_name', 'id'],
-                    },
-                    {
-                        model: database.UnitOfMeasure,
-                        as: 'unit_of_measure',
-                        attributes: ['unit_of_measure_name', 'id'],
-                    },
-                    {
-                        model: database.EquipmentManufacturer,
-                        as: 'equipment_manufacturer',
-                        attributes: ['manufacturer_name', 'id'],
-                    },
-                    {
-                        model: database.Equipment,
-                        as: 'equipments',
-                        attributes: ['status'],
-                        separate: true,
-                    },
-                ],
-            });
+    
+        const groupEquipmentList = await database.GroupEquipment.findAndCountAll({
+            where,
+            limit: parseInt(limit),
+            offset,
+            include: [
+                {
+                    model: database.EquipmentType,
+                    as: 'equipment_type',
+                    attributes: ['equipment_type_name', 'id'],
+                },
+                {
+                    model: database.UnitOfMeasure,
+                    as: 'unit_of_measure',
+                    attributes: ['unit_of_measure_name', 'id'],
+                },
+                {
+                    model: database.EquipmentManufacturer,
+                    as: 'equipment_manufacturer',
+                    attributes: ['manufacturer_name', 'id'],
+                },
+                {
+                    model: database.Equipment,
+                    as: 'equipments',
+                    attributes: ['status'],
+                    separate: true,
+                },
+            ],
+        });
+        console.log('groupEquipmentList', groupEquipmentList);
+    
         if (!groupEquipmentList) {
             throw new BadRequestError('No group equipment found');
         }
+    
+        const calculateStatusCounts = (equipments = []) => {
+            return equipments.reduce((acc, equipment) => {
+                acc[equipment.status] = (acc[equipment.status] || 0) + 1;
+                return acc;
+            }, {});
+        };
+    
         return {
             code: 200,
             message: 'Get all group equipment successfully',
             metadata: groupEquipmentList.rows.map((groupEquipment) => {
-                const statusCounts = groupEquipment.equipments.reduce(
-                    (acc, equipment) => {
-                        acc[equipment.status] =
-                            (acc[equipment.status] || 0) + 1;
-                        return acc;
-                    },
-                    {},
-                );
+                const plain = groupEquipment.get({ plain: true });
+    
                 return {
-                    code: groupEquipment.group_equipment_code,
-                    name: groupEquipment.group_equipment_name,
-                    description: groupEquipment.group_equipment_description,
+                    code: plain.group_equipment_code,
+                    name: plain.group_equipment_name,
+                    description: plain.group_equipment_description,
                     unitOfMeasure: {
-                        id: groupEquipment.unit_of_measure.id,
-                        name: groupEquipment.unit_of_measure
-                            .unit_of_measure_name,
+                        id: plain.unit_of_measure?.id,
+                        name: plain.unit_of_measure?.unit_of_measure_name,
                     },
                     type: {
-                        id: groupEquipment.equipment_type.id,
-                        name: groupEquipment.equipment_type.equipment_type_name,
+                        id: plain.equipment_type?.id,
+                        name: plain.equipment_type?.equipment_type_name,
                     },
                     manufacturer: {
-                        id: groupEquipment.equipment_manufacturer.id,
-                        name: groupEquipment.equipment_manufacturer
-                            .manufacturer_name,
+                        id: plain.equipment_manufacturer?.id,
+                        name: plain.equipment_manufacturer?.manufacturer_name,
                     },
-                    equipmentStatusCounts: statusCounts,
-                    isDeleted: groupEquipment.is_deleted,
-                    isActive: groupEquipment.is_active,
-                    createdAt: groupEquipment.createdAt,
-                    updatedAt: groupEquipment.updatedAt,
+                    equipmentStatusCounts: calculateStatusCounts(plain.equipments),
+                    isDeleted: plain.is_deleted,
+                    isActive: plain.is_active,
+                    createdAt: plain.create_time,
+                    updatedAt: plain.update_time,
                 };
             }),
             meta: {
@@ -327,6 +328,7 @@ class GroupEquipmentService {
             },
         };
     };
+    
 
     static getGroupEquipmentByCode = async (groupEquipmentCode) => {
         console.log('groupEquipmentCode', groupEquipmentCode);

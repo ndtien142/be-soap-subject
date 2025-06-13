@@ -209,6 +209,81 @@ class EquipmentService {
             },
         };
     }
+    static async getEquipmentsByRoomId(roomId) {
+        // Kiểm tra phòng/kho có tồn tại không
+        const room = await database.Room.findOne({
+            where: { room_id: roomId },
+        });
+        
+        if (!room) {
+            throw new BadRequestError('Room not found');
+        }
+    
+        // Lấy danh sách thiết bị thuộc phòng này
+        const equipments = await database.Equipment.findAll({
+            where: { room_id: roomId },
+            include: [
+                {
+                    model: database.GroupEquipment,
+                    as: 'group_equipment',
+                    attributes: ['group_equipment_code', 'group_equipment_name'],
+                },
+                {
+                    model: database.ImportReceipt,
+                    as: 'import_receipt',
+                    include: [
+                        {
+                            model: database.Account,
+                        },
+                    ],
+                },
+                {
+                    model: database.Room,
+                    as: 'room',
+                    attributes: ['room_id', 'room_name'],
+                }
+            ],
+            order: [['create_time', 'DESC']],
+        });
+    
+        return {
+            code: 200,
+            message: 'Get equipments by room successfully',
+            data: equipments.map((e) => ({
+                serialNumber: e.serial_number,
+                dayOfFirstUse: e.day_of_first_use,
+                description: e.equipment_description,
+                location: e.equipment_location,
+                status: e.status,
+                groupEquipment: e.group_equipment
+                    ? {
+                          code: e.group_equipment.group_equipment_code,
+                          name: e.group_equipment.group_equipment_name,
+                      }
+                    : null,
+                room: e.room
+                    ? {
+                          id: e.room.id,
+                          name: e.room.name,
+                      }
+                    : null,
+                importReceipt: e.import_receipt
+                    ? {
+                          id: e.import_receipt.id,
+                          userCode: e.import_receipt.user_code,
+                          approvedBy: e.import_receipt.approved_by,
+                          receivedAt: e.import_receipt.date_of_received,
+                          note: e.import_receipt.note,
+                      }
+                    : null,
+                createdAt: e.create_time,
+                updatedAt: e.update_time,
+            })),
+        };
+    }
+    
+    
+
 }
 
 module.exports = EquipmentService;
