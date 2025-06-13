@@ -45,6 +45,13 @@ class EquipmentController {
             metadata: await EquipmentService.getAllEquipment(req.query),
         }).send(res);
     };
+    getEquipmentsByRoomId = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get equipments by room successfully',
+            metadata: await EquipmentService.getEquipmentsByRoomId(req.params.roomId),
+        }).send(res);
+    };
+    
 }
 
 module.exports = new EquipmentController();

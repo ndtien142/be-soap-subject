@@ -207,5 +207,10 @@ router.get(
     asyncHandler(equipmentController.getEquipmentBySerialNumber),
 );
 router.get('', asyncHandler(equipmentController.getAllEquipment));
+router.get(
+    '/room/:roomId',
+    asyncHandler(equipmentController.getEquipmentsByRoomId),
+);
+
 
 module.exports = router;
