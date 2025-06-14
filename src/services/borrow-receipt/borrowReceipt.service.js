@@ -435,6 +435,10 @@ class BorrowReceiptService {
         if (!borrowReceipt)
             throw new BadRequestError('Borrow receipt not found');
 
+        const files = await database.ReceiptFiles.findAll({
+            where: { receipt_id: id, receipt_type: 'borrow', status: 'active' },
+        });
+
         return {
             code: 200,
             message: 'Get borrow receipt details successfully',
@@ -485,6 +489,15 @@ class BorrowReceiptService {
                         address: group.equipment_manufacturer.address,
                     },
                 })),
+                files: files.map((file) => {
+                    return {
+                        id: file.id,
+                        filePath: file.file_path,
+                        fileName: file.file_name,
+                        note: file.note || null,
+                        createdTime: file.create_time,
+                    };
+                }),
             },
         };
     }
@@ -873,14 +886,24 @@ class BorrowReceiptService {
      * @param {string} userCode
      * @returns {object}
      */
-    static async maskBorrowedAndSetDayOfFirstUse({ borrowReceiptId, equipmentFiles, userCode }) {
+    static async maskBorrowedAndSetDayOfFirstUse({
+        borrowReceiptId,
+        equipmentFiles,
+        userCode,
+    }) {
         const transaction = await database.sequelize.transaction();
         try {
             // 1. Find borrow receipt and check status
-            const borrowReceipt = await database.BorrowReceipt.findByPk(borrowReceiptId, { transaction });
-            if (!borrowReceipt) throw new BadRequestError('Borrow receipt not found');
+            const borrowReceipt = await database.BorrowReceipt.findByPk(
+                borrowReceiptId,
+                { transaction },
+            );
+            if (!borrowReceipt)
+                throw new BadRequestError('Borrow receipt not found');
             if (borrowReceipt.status !== 'processing') {
-                throw new BadRequestError('Only processing receipts can be marked as borrowed');
+                throw new BadRequestError(
+                    'Only processing receipts can be marked as borrowed',
+                );
             }
 
             // 2. Get all BorrowReceiptDetail for this receipt
@@ -888,20 +911,20 @@ class BorrowReceiptService {
                 where: { borrow_receipt_id: borrowReceiptId },
                 transaction,
             });
-            const serialNumbers = details.map(d => d.serial_number);
+            const serialNumbers = details.map((d) => d.serial_number);
 
             // 3. Update equipment status and day_of_first_use
             await database.Equipment.update(
                 {
                     status: 'in_use',
                     day_of_first_use: database.sequelize.literal(
-                        'CASE WHEN day_of_first_use IS NULL THEN NOW() ELSE day_of_first_use END'
+                        'CASE WHEN day_of_first_use IS NULL THEN NOW() ELSE day_of_first_use END',
                     ),
                 },
                 {
                     where: { serial_number: serialNumbers },
                     transaction,
-                }
+                },
             );
 
             // 4. Create files for each equipment if provided
@@ -909,15 +932,18 @@ class BorrowReceiptService {
                 for (const eq of equipmentFiles) {
                     if (Array.isArray(eq.files)) {
                         for (const file of eq.files) {
-                            await database.ReceiptFiles.create({
-                                receipt_type: 'borrow',
-                                receipt_id: borrowReceiptId,
-                                file_path: file.filePath,
-                                file_name: file.fileName,
-                                upload_by: userCode,
-                                upload_time: new Date(),
-                                note: file.note,
-                            }, { transaction });
+                            await database.ReceiptFiles.create(
+                                {
+                                    receipt_type: 'borrow',
+                                    receipt_id: borrowReceiptId,
+                                    file_path: file.filePath,
+                                    file_name: file.fileName,
+                                    upload_by: userCode,
+                                    upload_time: new Date(),
+                                    note: file.note,
+                                },
+                                { transaction },
+                            );
                         }
                     }
                 }
@@ -931,7 +957,8 @@ class BorrowReceiptService {
 
             return {
                 code: 200,
-                message: 'Borrow receipt marked as borrowed, equipment updated, and files created successfully',
+                message:
+                    'Borrow receipt marked as borrowed, equipment updated, and files created successfully',
                 data: {
                     borrowReceiptId,
                     serialNumbers,
