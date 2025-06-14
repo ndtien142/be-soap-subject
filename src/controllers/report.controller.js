@@ -39,6 +39,11 @@ class ReportController {
             await ReportService.countImportReceipts(req.query),
         ).send(res);
     };
+    getAssetInflowReport = async (req, res, next) => {
+        new SuccessResponse(
+            await ReportService.getAssetInflowReport(req.query),
+        ).send(res);
+    }
 }
 
 module.exports = new ReportController();
