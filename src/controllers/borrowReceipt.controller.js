@@ -127,6 +127,22 @@ class BorrowReceiptController {
             metadata: result,
         }).send(res);
     };
+
+    markAsPartialBorrowed = async (req, res, next) => {
+        const { equipmentFiles } = req.body;
+        const borrowReceiptId = req.params.id;
+        const userCode = req.user.userCode;
+        const result = await BorrowReceiptService.markAsPartialBorrowed({
+            borrowReceiptId,
+            equipmentFiles,
+            userCode,
+        });
+        new SuccessResponse({
+            message:
+                'Borrow receipt marked as partial borrowed and equipment updated successfully',
+            metadata: result,
+        }).send(res);
+    };
 }
 
 module.exports = new BorrowReceiptController();

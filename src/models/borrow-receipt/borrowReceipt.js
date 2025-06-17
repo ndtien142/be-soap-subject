@@ -36,9 +36,14 @@ function model(sequelize) {
                 'rejected',
                 'returned',
                 'borrowed',
+                'is_partial',
             ),
             allowNull: false,
             defaultValue: 'requested',
+        },
+        is_partial: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
         },
         note: {
             type: DataTypes.STRING(1000),

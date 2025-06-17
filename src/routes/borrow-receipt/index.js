@@ -489,4 +489,9 @@ router.post(
     asyncHandler(borrowReceiptController.confirmBorrowed),
 );
 
+router.post(
+    '/:id/mark-partial-borrowed',
+    asyncHandler(borrowReceiptController.markAsPartialBorrowed),
+);
+
 module.exports = router;

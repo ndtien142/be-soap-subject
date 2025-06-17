@@ -324,7 +324,7 @@ database.EquipmentImages.belongsTo(database.Equipment, {
 
 // Sync the models with the database
 sequelize
-    .sync()
+    .sync({ alert: true })
     .then(() => {
         console.log('Database & tables created!');
     })

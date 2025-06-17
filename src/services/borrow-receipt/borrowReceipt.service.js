@@ -969,6 +969,102 @@ class BorrowReceiptService {
             throw error;
         }
     }
+
+    /**
+     * Mark a borrow receipt as partially borrowed if not enough equipment is available.
+     * Sets is_partial=true and status='in_use'.
+     * @param {number} borrowReceiptId
+     * @param {Array<{groupEquipmentCode: string, serialNumbers: string[]}>} partialEquipments
+     * @param {string} userCode
+     * @returns {object}
+     */
+    static async markAsPartialBorrowed({
+        borrowReceiptId,
+        equipmentFiles,
+        userCode,
+    }) {
+        const transaction = await database.sequelize.transaction();
+        try {
+            // 1. Find borrow receipt and check status
+            const borrowReceipt = await database.BorrowReceipt.findByPk(
+                borrowReceiptId,
+                { transaction },
+            );
+            if (!borrowReceipt)
+                throw new BadRequestError('Borrow receipt not found');
+            if (
+                borrowReceipt.status !== 'approved' &&
+                borrowReceipt.status !== 'processing'
+            ) {
+                throw new BadRequestError(
+                    'Only approved or processing receipts can be marked as partial borrowed',
+                );
+            }
+
+            // 2. Get all BorrowReceiptDetail for this receipt
+            const details = await database.BorrowReceiptDetail.findAll({
+                where: { borrow_receipt_id: borrowReceiptId },
+                transaction,
+            });
+            const serialNumbers = details.map((d) => d.serial_number);
+
+            // 3. Update equipment status and day_of_first_use
+            await database.Equipment.update(
+                {
+                    status: 'in_use',
+                    day_of_first_use: database.sequelize.literal(
+                        'CASE WHEN day_of_first_use IS NULL THEN NOW() ELSE day_of_first_use END',
+                    ),
+                },
+                {
+                    where: { serial_number: serialNumbers },
+                    transaction,
+                },
+            );
+
+            // 4. Create files for each equipment if provided
+            if (Array.isArray(equipmentFiles)) {
+                for (const eq of equipmentFiles) {
+                    if (Array.isArray(eq.files)) {
+                        for (const file of eq.files) {
+                            await database.ReceiptFiles.create(
+                                {
+                                    receipt_type: 'borrow',
+                                    receipt_id: borrowReceiptId,
+                                    file_path: file.filePath,
+                                    file_name: file.fileName,
+                                    upload_by: userCode,
+                                    upload_time: new Date(),
+                                    note: file.note,
+                                },
+                                { transaction },
+                            );
+                        }
+                    }
+                }
+            }
+
+            borrowReceipt.status = 'borrowed';
+            borrowReceipt.is_partial = true;
+            await borrowReceipt.save({ transaction });
+
+            await transaction.commit();
+
+            return {
+                code: 200,
+                message:
+                    'Borrow receipt marked as partial borrowed and equipment updated successfully',
+                data: {
+                    borrowReceiptId,
+                    isPartial: true,
+                    status: 'borrowed',
+                },
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
 }
 
 module.exports = BorrowReceiptService;
